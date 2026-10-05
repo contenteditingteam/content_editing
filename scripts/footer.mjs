@@ -1,0 +1,7 @@
+// The footer shared by every page. Change it here, then run:  node scripts/sync-footer.mjs && node scripts/build-blog.mjs
+export const footer = (p = "") => `<footer><div class="container"><div class="f-grid">
+  <div><a href="${p}index.html" class="logo"><img src="${p}images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="${p}services.html#academic">Academic editing</a></li><li><a href="${p}services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="${p}services.html#business">Business editing</a></li><li><a href="${p}services.html#proof">Proofreading</a></li><li><a href="${p}services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="${p}about.html">About</a></li><li><a href="${p}pricing.html">Pricing</a></li><li><a href="${p}blog.html">Blog</a></li><li><a href="${p}reviews.html">Customer reviews</a></li><li><a href="${p}contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="${p}login.html">Submit a document</a></li><li><a href="${p}contact.html">Ask a question</a></li><li><a href="${p}verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>`

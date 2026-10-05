@@ -10,7 +10,7 @@ const esc = (s: unknown) =>
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
 
-async function send(to: string[], subject: string, body: string) {
+async function send(to: string[], subject: string, body: string, replyTo?: string) {
   if (!to.length) return
   const html = `<div style="font-family:Segoe UI,Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e3e8f0;border-radius:12px">
     <h2 style="color:#0b3a7a;margin-top:0">${esc(subject)}</h2>${body}
@@ -19,7 +19,7 @@ async function send(to: string[], subject: string, body: string) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM, to, subject, html }),
+    body: JSON.stringify({ from: FROM, to, subject, html, ...(replyTo ? { reply_to: replyTo } : {}) }),
   })
   if (!res.ok) console.error("Resend error", res.status, await res.text())
 }
@@ -29,8 +29,18 @@ const profile = async (id: string | null) =>
 
 Deno.serve(async (req) => {
   if (req.headers.get("x-webhook-secret") !== Deno.env.get("WEBHOOK_SECRET")) return new Response("Unauthorized", { status: 401 })
-  const { type, record: o, old_record: old } = await req.json()
+  const { type, table, record: o, old_record: old } = await req.json()
   if (!o) return new Response("ignored")
+
+  // A new message from the website contact form: tell the staff (replying goes straight to the sender)
+  if (table === "contact_messages") {
+    if (type === "INSERT") {
+      const { data: staff } = await admin.from("profiles").select("email").in("role", ["admin", "manager"])
+      await send((staff ?? []).map((x) => x.email), "New website message from " + String(o.name).slice(0, 60),
+        `<p><b>${esc(o.name)}</b> (${esc(o.email)})${o.topic ? " about <b>" + esc(o.topic) + "</b>" : ""} wrote:</p><p style="white-space:pre-wrap;background:#f4f8ff;padding:12px;border-radius:8px">${esc(o.message)}</p>`, o.email)
+    }
+    return new Response("ok")
+  }
 
   const summary = `<p><b>Service:</b> ${esc(o.service)}<br><b>Words:</b> ${esc(o.word_count)}<br><b>Price:</b> $${Number(o.price ?? 0).toFixed(2)}</p>`
 

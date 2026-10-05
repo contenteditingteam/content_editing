@@ -2,6 +2,7 @@
 // Run:  node scripts/build-blog.mjs
 import { mkdirSync, writeFileSync } from "node:fs"
 import { posts, SITE, DATE } from "./blog-posts.mjs"
+import { footer } from "./footer.mjs"
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 const GTAG = `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script>`
@@ -13,7 +14,7 @@ const HEADER = `<header><div class="container nav">
     <li><a class="btn btn-primary" href="/login.html">Submit Document</a></li>
   </ul>
 </div></header>`
-const FOOTER = `<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved. · <a href="/blog.html">Blog</a> · <a href="/reviews.html">Customer reviews</a></div></div></footer>
+const FOOTER = `${footer("/")}
 <script src="/script.js"></script>`
 
 const head = ({ title, description, url, type = "website", extra = "" }) => `<!DOCTYPE html>

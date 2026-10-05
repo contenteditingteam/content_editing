@@ -33,10 +33,10 @@ if(curSel){curSel.value=ccy;curSel.addEventListener('change',()=>setCur(curSel.v
 document.addEventListener('currencychange',()=>{if(curSel)curSel.value=ccy;calc()});
 calc();
 
-/* pricing page: table cells carry their USD price in data-usd */
-const priceCells=$$('td[data-usd]'),curBtns=$$('[data-cur]');
+/* pricing page: every element with data-usd shows its USD price in the chosen currency */
+const priceCells=$$('[data-usd]'),curBtns=$$('[data-cur]');
 function renderPrices(){
-  priceCells.forEach(td=>td.textContent=fmtMoney(parseFloat(td.dataset.usd),ccy,ccy==='INR'?2:3));
+  priceCells.forEach(el=>el.textContent=fmtMoney(parseFloat(el.dataset.usd),ccy,ccy==='INR'?2:3));
   curBtns.forEach(b=>b.classList.toggle('on',b.dataset.cur===ccy));
 }
 curBtns.forEach(b=>b.addEventListener('click',()=>setCur(b.dataset.cur)));

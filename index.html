@@ -46,7 +46,7 @@
   <div class="blob b1" data-speed=".12"></div><div class="blob b2" data-speed=".2"></div><div class="blob b3" data-speed=".08"></div><div class="grid-bg"></div>
   <div class="container hero-grid">
     <div>
-      <span class="badge"><i></i> Human editors online now</span>
+      <span class="badge"><span aria-hidden="true">✓</span> Edited by humans, not AI</span>
       <h1>
         <span class="ln"><span style="--i:0">Perfect words</span></span>
         <span class="ln"><span style="--i:1">for <span class="rot-wrap"><span id="rot">academics</span></span></span></span>
@@ -97,16 +97,12 @@
   <div class="blob b1"></div><div class="blob b3"></div>
   <div class="container stats-grid">
     <div><b data-count="2" data-suffix=" hr">0</b><span>Fastest turnaround</span></div>
-    <div><b data-count="100" data-suffix="%">0</b><span>Human editors</span></div>
-    <div><b data-count="8">0</b><span>Editing services</span></div>
-    <div><b data-count="50" data-suffix="+">0</b><span>Subject areas</span></div>
+    <div><b data-count="12">0</b><span>Editing services</span></div>
+    <div><b data-count="2">0</b><span>Currencies: USD &amp; INR</span></div>
+    <div><b data-count="100" data-suffix="%">0</b><span>Human editing</span></div>
   </div>
 </section>
 
-<section id="activity"><div class="container">
-  <div class="section-head"><h2>Our year in <span class="grad-text">edits</span></h2><p>Every block is a day of editing work. Drag the skyline to rotate it, or switch to the flat view. (Sample data — connect your real numbers.)</p></div>
-  <div id="skyline-root"></div>
-</div></section>
 
 <section class="alt" id="quote"><div class="container quote">
   <div>
@@ -185,9 +181,9 @@
 
 <footer><div class="container"><div class="f-grid">
   <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
-  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic Editing</a></li><li><a href="services.html#business">Business Editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book Editing</a></li></ul></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
   <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-  <div><p class="f-title">Contact</p><ul><li>hello@contentedit.com</li><li>Mon–Fri, 9am–6pm</li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
 </div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="config.js"></script>
 <script src="reviews-data.js"></script>
@@ -210,20 +206,5 @@
 })();
 </script>
 <script src="script.js"></script>
-<script>
-/* Load the chart only when it is about to scroll into view */
-(function () {
-  var root = document.getElementById("skyline-root");
-  if (!root) return;
-  function load() {
-    var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "skyline/skyline.css"; document.head.appendChild(l);
-    import("./skyline/skyline.js");
-  }
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (e) { if (e.some(function (x) { return x.isIntersecting; })) { io.disconnect(); load(); } }, { rootMargin: "500px" });
-    io.observe(root);
-  } else load();
-})();
-</script>
 </body>
 </html>

@@ -24,7 +24,12 @@
 
 <section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
@@ -107,6 +112,14 @@
     reviewDialog.close(); document.dispatchEvent(new Event("orders-changed"));
   };
 
+  async function messagesPanel() {
+    const { data } = await sb.from("contact_messages").select("id,created_at,name,email,topic,message,handled").order("created_at", { ascending: false }).limit(50);
+    return `<div class="panel"><h2>Website messages</h2><p class="hint" style="margin-top:0;text-align:left">Messages sent from the Contact page. Reply by email, then mark as handled.</p>${table(["Date", "From", "About", "Message", "Status", ""],
+      (data || []).map((m) => `<tr><td>${fmt(m.created_at)}</td><td>${esc(m.name)}<br><a href="mailto:${esc(m.email)}">${esc(m.email)}</a></td><td>${esc(m.topic)}</td><td style="max-width:340px;white-space:pre-wrap">${esc(m.message)}</td>
+        <td>${m.handled ? '<span class="chip completed">handled</span>' : '<span class="chip new">new</span>'}</td>
+        <td><button class="btn btn-ghost btn-sm" data-msg-toggle="${esc(m.id)}|${m.handled ? "reopen" : "done"}">${m.handled ? "Reopen" : "Mark handled"}</button> <button class="btn btn-ghost btn-sm" data-msg-del="${esc(m.id)}">Delete</button></td></tr>`))}</div>`;
+  }
+
   async function reviewsPanel() {
     const { data } = await sb.from("reviews").select("id,created_at,rating,body,display_name,approved").order("created_at", { ascending: false });
     return `<div class="panel"><h2>Customer reviews</h2><p class="hint" style="margin-top:0;text-align:left">Reviews are hidden until you publish them.</p>${table(["Date", "Customer", "Rating", "Review", "Status", ""],
@@ -116,6 +129,20 @@
   }
 
   view.addEventListener("click", async (e) => {
+    const mt = e.target.closest("[data-msg-toggle]");
+    if (mt) {
+      const [id, act] = mt.dataset.msgToggle.split("|");
+      const { error } = await sb.from("contact_messages").update({ handled: act === "done" }).eq("id", id);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
+    const md = e.target.closest("[data-msg-del]");
+    if (md) {
+      if (!confirm("Delete this message permanently?")) return;
+      const { error } = await sb.from("contact_messages").delete().eq("id", md.dataset.msgDel);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
     const rvb = e.target.closest("[data-review]");
     if (rvb) { rvOrder = rvb.dataset.review; rvRating = 0; paintStars(); reviewDialog.querySelector("#rv-body").value = ""; reviewDialog.querySelector("#rv-msg").hidden = true; reviewDialog.showModal(); return; }
     const tg = e.target.closest("[data-rv-toggle]");
@@ -405,7 +432,7 @@
       }
     };
   }
-  async function managerView() { view.innerHTML = (await ordersPanel()) + (await reviewsPanel()); bindOrders(); }
+  async function managerView() { view.innerHTML = (await ordersPanel()) + (await messagesPanel()) + (await reviewsPanel()); bindOrders(); }
 
   /* ---------- admin ---------- */
   async function adminView() {
@@ -430,6 +457,7 @@
           (people || []).map((p) => `<tr><td>${esc(p.full_name)}</td><td>${esc(p.email)}</td><td>
             <select class="sm" data-role="${esc(p.id)}" ${p.id === user.id ? "disabled" : ""}>${opts(["admin", "manager", "editor", "customer"], p.role)}</select></td></tr>`))}</div>
         ${await ordersPanel()}
+        ${await messagesPanel()}
         ${await reviewsPanel()}`;
       $("#i-form").onsubmit = async (e) => {
         e.preventDefault();
