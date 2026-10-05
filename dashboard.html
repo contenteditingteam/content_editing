@@ -46,7 +46,7 @@
   $("#logout").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
 
   const SERVICES = ["Academic editing", "Business editing", "Proofreading", "Book editing", "Same-day editing", "Rewriting", "ESL editing"];
-  const STATUS = ["new", "assigned", "in_progress", "completed"];
+  const STATUS = ["new", "assigned", "in_progress", "completed", "cancelled"];
   const view = $("#view");
   const fmt = (d) => new Date(d).toLocaleDateString();
   const opts = (list, cur) => list.map((v) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(v.replace("_", " "))}</option>`).join("");
@@ -128,7 +128,86 @@
         <td><button class="btn btn-ghost btn-sm" data-rv-toggle="${esc(r.id)}|${r.approved ? "hide" : "show"}">${r.approved ? "Hide" : "Publish"}</button> <button class="btn btn-ghost btn-sm" data-rv-del="${esc(r.id)}">Delete</button></td></tr>`))}</div>`;
   }
 
+  // ----- order details: timeline, messages, cancel and revision -----
+  const REVISION_DAYS = 7; // keep equal to the 7 days in supabase/phase8.sql (request_revision) and revisionDays in scripts/legal-config.mjs
+  const EVENT_TEXT = {
+    created: "Order placed", paid: "Payment received", assigned: "Assigned to an editor", in_progress: "Editing started",
+    completed: "Edited document delivered", revision: "Revision requested", cancelled: "Order cancelled", refund_done: "Refund processed",
+  };
+  const ROLE_NAME = { customer: "Customer", editor: "Editor", manager: "Support", admin: "Support" };
+  const orderDialog = document.createElement("dialog");
+  orderDialog.id = "od-dlg";
+  document.body.appendChild(orderDialog);
+  orderDialog.addEventListener("click", (e) => { if (e.target === orderDialog) orderDialog.close(); });
+  const isStaff = me.role === "admin" || me.role === "manager";
+
+  async function openOrder(id) {
+    if (!orderDialog.open) orderDialog.showModal();
+    orderDialog.innerHTML = '<p class="hint">Loading…</p>';
+    const [{ data: o, error }, { data: events }, { data: msgs }] = await Promise.all([
+      sb.from("orders").select("id,created_at,service,word_count,price,currency,payment_status,status,doc_title,completed_at,refund_status,revision_count,customer_id").eq("id", id).single(),
+      sb.from("order_events").select("kind,note,created_at").eq("order_id", id).order("created_at"),
+      sb.from("order_messages").select("sender_id,sender_role,body,created_at").eq("order_id", id).order("created_at"),
+    ]);
+    if (error || !o) { orderDialog.innerHTML = '<p class="alert err">Could not open this order.</p>'; return; }
+    const mine = o.customer_id === user.id;
+    const cancelled = o.status === "cancelled";
+    const days = o.completed_at ? (Date.now() - new Date(o.completed_at).getTime()) / 864e5 : 99;
+    const canCancel = mine && o.status === "new";
+    const canRevise = mine && o.status === "completed" && days <= REVISION_DAYS;
+    orderDialog.innerHTML = `
+      <div class="od-head"><div><h3>${esc(o.doc_title || o.service)}</h3>
+        <p class="hint" style="margin:2px 0 0;text-align:left">${esc(o.service)} · ${esc(o.word_count)} words · ${money(o.price, o.currency)} · ${chip(o.status)} ${o.payment_status === "paid" ? payChip(o) : ""}${o.refund_status ? ` <span class="chip warn">refund ${o.refund_status === "done" ? "processed" : "requested"}</span>` : ""}</p></div>
+        <button class="btn btn-ghost btn-sm" type="button" data-od-close>Close</button></div>
+      <h4 class="od-h">Progress</h4>
+      <ol class="timeline">${(events || []).map((ev) => `<li class="${ev.kind}"><b>${esc(EVENT_TEXT[ev.kind] || ev.kind)}</b><span>${new Date(ev.created_at).toLocaleString()}</span>${ev.note ? `<em>${esc(ev.note)}</em>` : ""}</li>`).join("")}</ol>
+      <h4 class="od-h">Messages</h4>
+      <div class="thread" id="od-thread">${(msgs || []).map((m) => `<div class="msg ${m.sender_id === user.id ? "me" : ""}"><small>${m.sender_id === user.id ? "You" : esc(ROLE_NAME[m.sender_role] || "Team")} · ${new Date(m.created_at).toLocaleString()}</small><p>${esc(m.body)}</p></div>`).join("") || '<p class="hint" style="text-align:left">No messages yet.</p>'}</div>
+      ${cancelled ? "" : `<form id="od-send" class="inline-form"><label class="sr-only" for="od-body">Message</label><input id="od-body" maxlength="2000" placeholder="Write a message about this order" required><button class="btn btn-primary btn-sm" type="submit">Send</button></form>`}
+      <div class="alert" id="od-msg" hidden></div>
+      ${canRevise ? `<h4 class="od-h">Request a free revision</h4><p class="hint" style="text-align:left;margin:0 0 8px">Available for ${REVISION_DAYS} days after delivery. Say exactly what should change.</p>
+        <form id="od-rev"><label class="sr-only" for="od-rev-note">What should change</label><textarea id="od-rev-note" rows="3" minlength="10" maxlength="2000" required></textarea><button class="btn btn-ghost btn-sm" style="margin-top:8px" type="submit">Send revision request</button></form>` : ""}
+      ${canCancel ? `<h4 class="od-h">Cancel this order</h4><p class="hint" style="text-align:left;margin:0 0 8px">You can cancel until an editor is assigned.${o.payment_status === "paid" ? " Because you have paid, a refund will be requested and our team will process it." : ""}</p><button class="btn btn-ghost btn-sm" type="button" data-od-cancel>Cancel order</button>` : ""}
+      ${isStaff && o.refund_status === "requested" ? `<h4 class="od-h">Refund</h4><p class="hint" style="text-align:left;margin:0 0 8px">Refund the customer in Razorpay first, then mark it done here.</p><button class="btn btn-primary btn-sm" type="button" data-od-refund>Mark refund as processed</button>` : ""}`;
+    const th = orderDialog.querySelector("#od-thread"); th.scrollTop = th.scrollHeight;
+    const msg = orderDialog.querySelector("#od-msg");
+    const refresh = () => { document.dispatchEvent(new Event("orders-changed")); return openOrder(id); };
+    orderDialog.querySelector("[data-od-close]").onclick = () => orderDialog.close();
+    const send = orderDialog.querySelector("#od-send");
+    if (send) send.onsubmit = async (e) => {
+      e.preventDefault();
+      const b = send.querySelector("button"); b.disabled = true;
+      const { error } = await sb.from("order_messages").insert({ order_id: id, body: orderDialog.querySelector("#od-body").value.trim() });
+      b.disabled = false;
+      if (error) return note(msg, error.message, false);
+      openOrder(id);
+    };
+    const rev = orderDialog.querySelector("#od-rev");
+    if (rev) rev.onsubmit = async (e) => {
+      e.preventDefault();
+      const { error } = await sb.rpc("request_revision", { p_order: id, p_note: orderDialog.querySelector("#od-rev-note").value });
+      if (error) return note(msg, error.message, false);
+      refresh();
+    };
+    const cb = orderDialog.querySelector("[data-od-cancel]");
+    if (cb) cb.onclick = async () => {
+      if (!confirm("Cancel this order?")) return;
+      const { error } = await sb.rpc("cancel_order", { p_order: id });
+      if (error) return note(msg, error.message, false);
+      refresh();
+    };
+    const rf = orderDialog.querySelector("[data-od-refund]");
+    if (rf) rf.onclick = async () => {
+      const { error } = await sb.from("orders").update({ refund_status: "done" }).eq("id", id);
+      if (error) return note(msg, error.message, false);
+      refresh();
+    };
+  }
+  const detailsBtn = (o) => `<button class="btn btn-ghost btn-sm" data-od="${esc(o.id)}">Details</button>`;
+
   view.addEventListener("click", async (e) => {
+    const odb = e.target.closest("[data-od]");
+    if (odb) return openOrder(odb.dataset.od);
     const mt = e.target.closest("[data-msg-toggle]");
     if (mt) {
       const [id, act] = mt.dataset.msgToggle.split("|");
@@ -345,7 +424,7 @@
       };
       $("#o-list").innerHTML = table(["Date", "Service", "Words", "Price", "Payment", "Status", "Files"],
         orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payCell(o)}</td><td>${chip(o.status)}</td>
-          <td>${fileBtns(o, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") + " " + certBtn(o) + " " + reviewCell(o) : ""}</td></tr>`));
+          <td>${detailsBtn(o)} ${fileBtns(o, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") + " " + certBtn(o) + " " + reviewCell(o) : ""}</td></tr>`));
     };
     document.addEventListener("orders-changed", draw);
 
@@ -394,8 +473,8 @@
       const orders = await loadOrders();
       $("#e-list").innerHTML = table(["Date", "Service", "Words", "Instructions", "Customer file", "Status", "Return edited file"],
         orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${esc(o.instructions)}</td>
-          <td>${fileBtns(o, "Download")}</td>
-          <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1), o.status)}</select></td>
+          <td>${detailsBtn(o)} ${fileBtns(o, "Download")}</td>
+          <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1, 4), o.status)}</select></td>
           <td>${o.result_path ? dlBtn(EDIT, o.result_path, "Sent ✓") + " " : ""}<input type="file" class="file-sm" data-up="${esc(o.id)}"></td></tr>`));
     };
     view.onchange = async (e) => {
@@ -413,7 +492,7 @@
     const orders = await loadOrders();
     return `<div class="panel"><h2>All orders</h2>${table(["Date", "Customer", "Service", "Words", "Price", "Payment", "Files", "Editor", "Status"],
       orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.customer ? o.customer.full_name || o.customer.email : "")}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payChip(o)}</td>
-        <td>${fileBtns(o, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")} ${certBtn(o)} ${o.verified_at ? "" : `<button class="btn btn-ghost btn-sm" data-verify="${esc(o.id)}">Re-check</button>`}</td>
+        <td>${detailsBtn(o)} ${fileBtns(o, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")} ${certBtn(o)} ${o.verified_at ? "" : `<button class="btn btn-ghost btn-sm" data-verify="${esc(o.id)}">Re-check</button>`}</td>
         <td><select class="sm" data-editor="${esc(o.id)}" ${o.payment_status === "paid" ? "" : 'disabled title="Assign after payment"'}>${edOpts(o.editor_id)}</select></td>
         <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS, o.status)}</select></td></tr>`))}</div>`;
   }
