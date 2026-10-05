@@ -1,3 +1,4 @@
 .claude/
 skyline-app/node_modules/
 .env
+supabase/.temp/
