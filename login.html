@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login | Content Editing</title>
+<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="login.html">Login</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container"><h1>Welcome</h1><p>Log in to submit documents and track your orders.</p></div></div>
+
+<section class="dash"><div class="container">
+  <div class="auth-box">
+    <div class="tabs" role="tablist">
+      <button class="tab on" id="t-login" type="button">Login</button>
+      <button class="tab" id="t-signup" type="button">Create account</button>
+    </div>
+
+    <form id="f-login">
+      <label for="l-email">Email</label><input id="l-email" type="email" autocomplete="email" required>
+      <label for="l-pass">Password</label><input id="l-pass" type="password" autocomplete="current-password" required>
+      <div class="alert" id="l-msg" hidden></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Login</button>
+      <p class="hint"><a href="#" id="forgot">Forgot password?</a></p>
+    </form>
+
+    <form id="f-signup" hidden>
+      <label for="s-name">Full name</label><input id="s-name" autocomplete="name" required>
+      <label for="s-email">Email</label><input id="s-email" type="email" autocomplete="email" required>
+      <label for="s-pass">Password (min 8 characters)</label><input id="s-pass" type="password" minlength="8" autocomplete="new-password" required>
+      <div class="alert" id="s-msg" hidden></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Create account</button>
+      <p class="hint">Customers sign up here. Invited as a <b>manager</b> or <b>editor</b>? Create your account with the same email your admin invited.</p>
+    </form>
+  </div>
+</div></section>
+
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script>
+(async () => {
+  if (await getUser()) { location.replace("dashboard.html"); return; }
+  const show = (el, text, ok) => { el.hidden = false; el.className = "alert " + (ok ? "ok" : "err"); el.textContent = text; };
+  const tl = $("#t-login"), ts = $("#t-signup"), fl = $("#f-login"), fs = $("#f-signup");
+  const tab = (login) => { tl.classList.toggle("on", login); ts.classList.toggle("on", !login); fl.hidden = !login; fs.hidden = login; };
+  tl.onclick = () => tab(true); ts.onclick = () => tab(false);
+  if (location.hash === "#signup") tab(false);
+
+  fl.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = $("#l-msg"), btn = fl.querySelector("button[type=submit]");
+    btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: $("#l-email").value.trim(), password: $("#l-pass").value });
+    btn.disabled = false;
+    if (error) return show(msg, error.message, false);
+    location.replace("dashboard.html");
+  };
+
+  fs.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = $("#s-msg"), btn = fs.querySelector("button[type=submit]");
+    btn.disabled = true;
+    const { data, error } = await sb.auth.signUp({
+      email: $("#s-email").value.trim(), password: $("#s-pass").value,
+      options: { data: { full_name: $("#s-name").value.trim() } },
+    });
+    btn.disabled = false;
+    if (error) return show(msg, error.message, false);
+    if (data.session) return location.replace("dashboard.html");
+    show(msg, "Account created. Check your email and click the confirmation link, then log in.", true);
+  };
+
+  $("#forgot").onclick = async (e) => {
+    e.preventDefault();
+    const email = $("#l-email").value.trim(), msg = $("#l-msg");
+    if (!email) return show(msg, "Enter your email above first.", false);
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+    show(msg, error ? error.message : "Password reset email sent.", !error);
+  };
+})();
+</script>
+</body>
+</html>
