@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Submit Document | Content Edit</title>
+<link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="contact.html">Submit Document</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container"><h1>Submit Your Document</h1><p>Tell us what you need and we'll reply with a quote and timeline.</p></div></div>
+
+<section><div class="container contact-grid">
+  <form class="quote-box" data-demo>
+    <label>Full name</label><input required>
+    <label>Email</label><input type="email" required>
+    <label>Service</label>
+    <select><option>Academic editing</option><option>Business editing</option><option>Proofreading</option><option>Book editing</option><option>Same-day editing</option><option>Rewriting</option></select>
+    <label>Word count</label><input type="number" min="0">
+    <label>Upload document</label><input type="file">
+    <label>Instructions</label><textarea rows="4"></textarea>
+    <p class="msg" style="color:var(--green);margin:10px 0"></p>
+    <button class="btn btn-primary" type="submit">Send Request</button>
+  </form>
+  <div class="card"><h3>Contact details</h3><p>Email: hello@contentedit.com<br>Hours: Mon–Fri, 9am–6pm</p>
+    <div class="note">Demo form: it doesn't send anything yet. Connect it to Formspree, EmailJS or your own backend.</div></div>
+</div></section>
+
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Edit. All rights reserved.</div></div></footer>
+<script src="script.js"></script>
+</body>
+</html>
