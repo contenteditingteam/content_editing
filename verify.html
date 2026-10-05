@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify a Certificate | Content Editing</title>
+<meta name="description" content="Check that a Content Editing certificate is genuine by entering its verification code.">
+<link rel="canonical" href="https://contentediting.online/verify">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Verify a Certificate | Content Editing">
+<meta property="og:description" content="Check that a Content Editing certificate is genuine by entering its verification code.">
+<meta property="og:url" content="https://contentediting.online/verify">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<meta name="twitter:card" content="summary">
+
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container"><h1>Verify a Certificate</h1><p>Check that an editing certificate is genuine.</p></div></div>
+
+<section class="dash"><div class="container">
+  <div class="auth-box">
+    <form id="v-form">
+      <label for="v-code">Verification code (printed under the QR code)</label>
+      <input id="v-code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" required>
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Verify</button>
+    </form>
+    <div id="v-result"></div>
+  </div>
+</div></section>
+
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script>
+(() => {
+  const out = $("#v-result");
+  const check = async (code) => {
+    out.innerHTML = "";
+    const { data, error } = await sb.rpc("verify_certificate", { p_code: code });
+    if (error) { out.innerHTML = '<div class="alert err">Could not check this code right now. Please try again.</div>'; return; }
+    const c = data && data[0];
+    if (!c) { out.innerHTML = '<div class="alert err">No certificate was found for this code. Check it and try again.</div>'; return; }
+    out.innerHTML = `<div class="alert ok"><b>✓ This certificate is genuine.</b></div>
+      <div class="summary" style="margin-top:14px">
+        <div class="sum-row"><span>Certificate no.</span><b>${esc(c.certificate_no)}</b></div>
+        <div class="sum-row"><span>Issued to</span><b>${esc(c.customer_name)}</b></div>
+        <div class="sum-row"><span>Document</span><b>${esc(c.doc_title)}</b></div>
+        <div class="sum-row"><span>Service</span><b>${esc(c.service)}</b></div>
+        <div class="sum-row"><span>Words edited</span><b>${Number(c.word_count).toLocaleString()}</b></div>
+        <div class="sum-row"><span>Date completed</span><b>${new Date(c.certified_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</b></div>
+      </div>`;
+  };
+  $("#v-form").onsubmit = (e) => { e.preventDefault(); check($("#v-code").value); };
+  const c = new URLSearchParams(location.search).get("c");
+  if (c) { $("#v-code").value = c.match(/.{1,4}/g).join("-"); check(c); }
+})();
+</script>
+</body>
+</html>

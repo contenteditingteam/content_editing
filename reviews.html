@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer Reviews | Content Editing</title>
+<meta name="description" content="Read reviews from real Content Editing customers. Every review comes from a customer whose order has been completed.">
+<link rel="canonical" href="https://contentediting.online/reviews">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Customer Reviews | Content Editing">
+<meta property="og:description" content="Read reviews from real Content Editing customers.">
+<meta property="og:url" content="https://contentediting.online/reviews">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container"><h1>Customer Reviews</h1><p>Every review here was written by a customer whose order has been completed.</p></div></div>
+
+<section class="dash"><div class="container">
+  <div id="r-summary" style="text-align:center;margin-bottom:30px"></div>
+  <div class="grid g3" id="r-list"><p class="hint" style="grid-column:1/-1">Loading reviews…</p></div>
+  <p style="text-align:center;margin-top:34px"><a class="btn btn-primary" href="login.html">Try Content Editing</a></p>
+</div></section>
+
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="config.js"></script>
+<script src="reviews-data.js"></script>
+<script src="reviews-ui.js"></script>
+<script src="script.js"></script>
+<script>
+(async () => {
+  const { loadReviews, card, stars } = CEReviews;
+  const list = document.getElementById("r-list"), sum = document.getElementById("r-summary");
+  const { real, shown } = await loadReviews(100);
+  if (!shown.length) {
+    list.innerHTML = '<p class="hint" style="grid-column:1/-1">No reviews yet. Reviews appear here after customers complete an order and share their experience.</p>';
+    return;
+  }
+  if (real.length) {
+    const avg = real.reduce((t, x) => t + x.rating, 0) / real.length;
+    sum.innerHTML = '<div class="stars" style="font-size:2rem">' + stars(Math.round(avg)) + '</div><b style="font-size:1.4rem">' + avg.toFixed(1) + ' out of 5</b><div class="hint" style="margin-top:4px">from ' + real.length + ' customer review' + (real.length === 1 ? "" : "s") + '</div>';
+  } else {
+    sum.innerHTML = '<div class="hint">Preview mode: sample cards are only visible on your own computer.</div>';
+  }
+  list.innerHTML = shown.map(card).join("");
+})();
+</script>
+</body>
+</html>

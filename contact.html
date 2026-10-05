@@ -3,15 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Submit Document | Content Edit</title>
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<title>Submit Document | Content Editing</title>
+<meta name="description" content="Questions about editing, proofreading or your order? Contact the Content Editing team.">
+<link rel="canonical" href="https://contentediting.online/contact">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Submit Document | Content Editing">
+<meta property="og:description" content="Questions about editing, proofreading or your order? Contact the Content Editing team.">
+<meta property="og:url" content="https://contentediting.online/contact">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<meta name="twitter:card" content="summary">
+
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
   </ul>
 </div></header>
@@ -19,14 +29,15 @@
 <div class="page-hero"><div class="container"><h1>Submit Your Document</h1><p>Tell us what you need and we'll reply with a quote and timeline.</p></div></div>
 
 <section><div class="container contact-grid">
+  <h2 class="sr-only">Send us your details</h2>
   <form class="quote-box" data-demo>
-    <label>Full name</label><input required>
-    <label>Email</label><input type="email" required>
-    <label>Service</label>
-    <select><option>Academic editing</option><option>Business editing</option><option>Proofreading</option><option>Book editing</option><option>Same-day editing</option><option>Rewriting</option></select>
-    <label>Word count</label><input type="number" min="0">
-    <label>Upload document</label><input type="file">
-    <label>Instructions</label><textarea rows="4"></textarea>
+    <label for="c-name">Full name</label><input id="c-name" name="name" autocomplete="name" required>
+    <label for="c-email">Email</label><input id="c-email" name="email" type="email" autocomplete="email" required>
+    <label for="c-service">Service</label>
+    <select id="c-service" name="service"><option>Academic editing</option><option>Business editing</option><option>Proofreading</option><option>Book editing</option><option>Same-day editing</option><option>Rewriting</option></select>
+    <label for="c-words">Word count</label><input id="c-words" name="words" type="number" min="0">
+    <label for="c-file">Upload document</label><input id="c-file" name="file" type="file">
+    <label for="c-ins">Instructions</label><textarea id="c-ins" name="instructions" rows="4"></textarea>
     <p class="msg" style="color:var(--green);margin:10px 0"></p>
     <button class="btn btn-primary" type="submit">Send Request</button>
   </form>
@@ -34,7 +45,7 @@
     <div class="note">Demo form: it doesn't send anything yet. Connect it to Formspree, EmailJS or your own backend.</div></div>
 </div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Edit. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="script.js"></script>
 </body>
 </html>
