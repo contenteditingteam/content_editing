@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Login | Content Editing</title>
 <meta name="description" content="Log in or create a Content Editing account to submit documents, track your orders and download your edited files.">
-<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
+<script src="/consent.js" defer></script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
@@ -38,6 +38,7 @@
       <label for="s-name">Full name</label><input id="s-name" autocomplete="name" required>
       <label for="s-email">Email</label><input id="s-email" type="email" autocomplete="email" required>
       <label for="s-pass">Password (min 8 characters)</label><input id="s-pass" type="password" minlength="8" autocomplete="new-password" required>
+      <label class="consent" for="s-terms"><input id="s-terms" type="checkbox" required><span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of service</a>, <a href="/privacy.html" target="_blank" rel="noopener">Privacy policy</a> and <a href="/refunds.html" target="_blank" rel="noopener">Refund policy</a>.</span></label>
       <div class="alert" id="s-msg" hidden></div>
       <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Create account</button>
       <p class="hint">Customers sign up here. Invited as a <b>manager</b> or <b>editor</b>? Create your account with the same email your admin invited.</p>
@@ -49,7 +50,7 @@
   <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
   <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
   <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul><p class="f-title" style="margin-top:18px">Legal</p><ul><li><a href="terms.html">Terms of service</a></li><li><a href="privacy.html">Privacy policy</a></li><li><a href="refunds.html">Refunds &amp; revisions</a></li><li><a href="#" data-cookie-settings>Cookie settings</a></li></ul></div>
 </div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -80,7 +81,7 @@
     btn.disabled = true;
     const { data, error } = await sb.auth.signUp({
       email: $("#s-email").value.trim(), password: $("#s-pass").value,
-      options: { data: { full_name: $("#s-name").value.trim() } },
+      options: { data: { full_name: $("#s-name").value.trim(), accepted_terms: $("#s-terms").checked } },
     });
     btn.disabled = false;
     if (error) return show(msg, error.message, false);

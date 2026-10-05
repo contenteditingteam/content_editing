@@ -3,9 +3,10 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { posts, SITE, DATE } from "./blog-posts.mjs"
 import { footer } from "./footer.mjs"
+import { legalPages } from "./legal-pages.mjs"
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-const GTAG = `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script>`
+const GTAG = `<script src="/consent.js" defer></script>`
 const HEADER = `<header><div class="container nav">
   <a href="/index.html" class="logo"><img src="/images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
@@ -102,7 +103,7 @@ ${FOOTER}
 `)
 
 // ---- sitemap + robots ----
-const pages = ["", "services", "pricing", "about", "contact", "blog", "reviews", "verify", ...posts.map((p) => `blog/${p.slug}`)]
+const pages = ["", "services", "pricing", "about", "contact", "blog", "reviews", "verify", ...legalPages, ...posts.map((p) => `blog/${p.slug}`)]
 writeFileSync("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${pages.map((u) => `  <url><loc>${SITE}/${u}</loc><lastmod>${DATE}</lastmod></url>`).join("\n")}
