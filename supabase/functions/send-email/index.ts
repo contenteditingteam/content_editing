@@ -36,19 +36,23 @@ Deno.serve(async (req) => {
 
   if (type === "INSERT") {
     const customer = await profile(o.customer_id)
-    if (customer) await send([customer.email], "We received your order", `<p>Hi ${esc(customer.full_name || "there")}, thanks for your order. We will assign an editor shortly.</p>${summary}`)
-    const { data: staff } = await admin.from("profiles").select("email").in("role", ["admin", "manager"])
-    await send((staff ?? []).map((s) => s.email), "New order received", `<p>${esc(customer?.full_name || customer?.email || "A customer")} submitted a new document.</p>${summary}`)
+    if (customer) await send([customer.email], "We received your order", `<p>Hi ${esc(customer.full_name || "there")}, thanks for your order. Please complete the payment from your dashboard so we can start.</p>${summary}`)
   }
 
   if (type === "UPDATE") {
+    if (o.payment_status === "paid" && old?.payment_status !== "paid") {
+      const customer = await profile(o.customer_id)
+      if (customer) await send([customer.email], "Payment received", `<p>Hi ${esc(customer.full_name || "there")}, we received your payment. An editor will be assigned shortly.</p>${summary}`)
+      const { data: staff } = await admin.from("profiles").select("email").in("role", ["admin", "manager"])
+      await send((staff ?? []).map((s) => s.email), "New paid order", `<p>${esc(customer?.full_name || customer?.email || "A customer")} paid for a new document. It is ready to assign.</p>${summary}`)
+    }
     if (o.editor_id && o.editor_id !== old?.editor_id) {
       const editor = await profile(o.editor_id)
       if (editor) await send([editor.email], "A document was assigned to you", `<p>Hi ${esc(editor.full_name || "there")}, you have a new document to edit.</p>${summary}`)
     }
     if (o.status === "completed" && old?.status !== "completed") {
       const customer = await profile(o.customer_id)
-      if (customer) await send([customer.email], "Your edited document is ready", `<p>Hi ${esc(customer.full_name || "there")}, your edited file is ready to download.</p>${summary}`)
+      if (customer) await send([customer.email], "Your edited document is ready", `<p>Hi ${esc(customer.full_name || "there")}, your edited file is ready to download, along with your editing certificate, in your dashboard.</p>${summary}`)
     }
   }
   return new Response("ok")
