@@ -1,3 +1,7 @@
+// Turn this on (true) AFTER you have run supabase/phase4.sql and supabase/phase5.sql in Supabase.
+// While it is false the site does not ask the database for reviews, so the browser shows no error.
+window.DB_REVIEWS = false;
+
 // REAL reviews you have permission to show.
 // Add one object per review, then save. They appear on the home page and the Reviews page (up to 15 on the home page).
 // Only add words a real customer actually wrote and agreed to share.

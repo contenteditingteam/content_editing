@@ -17,10 +17,12 @@
     const list = [];
     (window.REAL_REVIEWS || []).filter((r) => r.verified).forEach((r) =>
       list.push({ name: r.name, rating: r.rating, text: r.text, date: r.date, badge: "Customer review" }));
-    try {
-      (await rpc("public_reviews", { p_limit: limit })).forEach((r) =>
-        list.push({ name: r.display_name, rating: r.rating, text: r.body, date: r.created_at, badge: "Verified customer" }));
-    } catch (e) { /* the database part is optional */ }
+    if (window.DB_REVIEWS) {
+      try {
+        (await rpc("public_reviews", { p_limit: limit })).forEach((r) =>
+          list.push({ name: r.display_name, rating: r.rating, text: r.body, date: r.created_at, badge: "Verified customer" }));
+      } catch (e) { /* the database part is optional */ }
+    }
     const real = list.slice(0, limit);
     const shown = real.slice();
     if (isPreview) (window.SAMPLE_REVIEWS || []).slice(0, Math.max(0, limit - shown.length)).forEach((s) => shown.push({ ...s, sample: true }));
