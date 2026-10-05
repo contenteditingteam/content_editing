@@ -1,0 +1,8 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@source "./";
+
+/* No preflight: the host page keeps its own base styles. */
+#skyline-root{--color-background:#ffffff;--color-foreground:#10192b;--color-border:#dbe4f2;--color-muted-foreground:#5a6578}
+#skyline-root section{padding:1.25rem}
+#skyline-root header{position:static;top:auto;left:auto;right:auto;z-index:auto;background:none;box-shadow:none;backdrop-filter:none;transform:none}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Content Edit | Professional Editing & Proofreading Services</title>
 <meta name="description" content="Content Edit offers expert human editing and proofreading for academic manuscripts, business documents and books, with fast turnaround and a free editing certificate.">
-<link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="skyline/skyline.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -28,7 +28,7 @@
     <li><a href="pricing.html">Pricing</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="contact.html">Contact</a></li>
-    <li><a class="btn btn-primary" href="contact.html">Submit Document</a></li>
+    <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
   </ul>
 </div></header>
 
@@ -93,6 +93,11 @@
   </div>
 </section>
 
+<section id="activity"><div class="container">
+  <div class="section-head"><h2>Our year in <span class="grad-text">edits</span></h2><p>Every block is a day of editing work. Drag the skyline to rotate it, or switch to the flat view. (Sample data — connect your real numbers.)</p></div>
+  <div id="skyline-root"></div>
+</div></section>
+
 <section class="alt" id="quote"><div class="container quote">
   <div>
     <h2 style="font-size:clamp(1.9rem,3.6vw,2.7rem);margin-bottom:12px;letter-spacing:-.8px">Get an <span class="grad-text">instant quote</span></h2>
@@ -113,7 +118,7 @@
     <input id="q-words" type="number" min="0" value="2000">
     <div style="display:flex;justify-content:space-between;margin-top:14px;color:var(--muted)"><span>Price per word</span><b id="q-ppw"></b></div>
     <div class="total"><span>Total cost</span><b id="q-total"></b></div>
-    <a class="btn btn-primary" style="width:100%;text-align:center" href="contact.html">Order Now</a>
+    <a class="btn btn-primary" style="width:100%;text-align:center" href="login.html">Order Now</a>
   </div>
 </div></section>
 
@@ -162,7 +167,7 @@
   <details><summary>Can I request revisions?</summary><p>Yes, you can ask follow-up questions or request a re-check at no extra cost.</p></details>
 </div></section>
 
-<div class="cta-band"><div class="container"><h2>Ready to polish your writing?</h2><p>Submit your document today and get it back error-free.</p><a class="btn" href="contact.html">Submit Your Document</a></div></div>
+<div class="cta-band"><div class="container"><h2>Ready to polish your writing?</h2><p>Submit your document today and get it back error-free.</p><a class="btn" href="login.html">Submit Your Document</a></div></div>
 
 <footer><div class="container"><div class="f-grid">
   <div><a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
@@ -171,5 +176,6 @@
   <div><h4>Contact</h4><ul><li>hello@contentedit.com</li><li>Mon–Fri, 9am–6pm</li></ul></div>
 </div><div class="copy">© 2026 Content Edit. All rights reserved.</div></div></footer>
 <script src="script.js"></script>
+<script type="module" src="skyline/skyline.js"></script>
 </body>
 </html>

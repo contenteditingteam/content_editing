@@ -1,1 +1,3 @@
 .claude/
+skyline-app/node_modules/
+.env

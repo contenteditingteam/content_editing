@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard | Content Editing</title>
+<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container">
+  <h1 id="who">Loading…</h1>
+  <p><span class="role" id="role"></span></p>
+</div></div>
+
+<section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
+
+<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script>
+(async () => {
+  const user = await getUser();
+  if (!user) return location.replace("login.html");
+  const { data: me } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  if (!me) { await sb.auth.signOut(); return location.replace("login.html"); }
+
+  $("#who").textContent = me.full_name || me.email;
+  $("#role").textContent = me.role;
+  $("#logout").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
+
+  const SERVICES = ["Academic editing", "Business editing", "Proofreading", "Book editing", "Same-day editing", "Rewriting", "ESL editing"];
+  const STATUS = ["new", "assigned", "in_progress", "completed"];
+  const view = $("#view");
+  const fmt = (d) => new Date(d).toLocaleDateString();
+  const opts = (list, cur) => list.map((v) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(v.replace("_", " "))}</option>`).join("");
+  const table = (heads, rows) => `<div class="table-wrap"><table><thead><tr>${heads.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("") || `<tr><td colspan="${heads.length}">Nothing here yet.</td></tr>`}</tbody></table></div>`;
+  const note = (el, text, ok) => { el.hidden = false; el.className = "alert " + (ok ? "ok" : "err"); el.textContent = text; };
+  const chip = (s) => `<span class="chip ${esc(s)}">${esc(s.replace("_", " "))}</span>`;
+
+  const CUST = "Customer file uploading", EDIT = "Editor file uploading";
+  const PLANS = [
+    ["academic-5", "5-day academic editing"], ["academic-2", "2-day academic editing"], ["academic-1", "1-day academic editing"],
+    ["proof-5", "5-day proofreading"], ["proof-2", "2-day proofreading"], ["proof-1", "1-day proofreading"],
+    ["business-3", "3-day business editing"], ["business-1", "1-day business editing"],
+    ["rush-4h", "4-hour editing"], ["rush-2h", "2-hour editing"], ["dev-14", "Developmental editing (14 days)"], ["rewrite-3", "3-day rewriting"],
+  ];
+  const money = (n) => "$" + Number(n || 0).toFixed(2);
+  const fileName = (p) => String(p || "").split("/").pop().replace(/^\d+-/, "");
+  const safeName = (n) => n.replace(/[^\w.\-]+/g, "_");
+  const loadScript = (src) => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => no(new Error("Could not load " + src)); document.head.appendChild(s); });
+  const dlBtn = (bucket, path, label) => path ? `<button class="btn btn-ghost btn-sm" data-dl="${esc(bucket)}|${esc(path)}" title="${esc(fileName(path))}">${label}</button>` : "";
+
+  async function countWords(file) {
+    const ext = file.name.split(".").pop().toLowerCase();
+    let text = "";
+    if (ext === "txt" || ext === "md") text = await file.text();
+    else if (ext === "docx") {
+      if (!window.JSZip) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");
+      const zip = await JSZip.loadAsync(await file.arrayBuffer());
+      const xml = await zip.file("word/document.xml").async("string");
+      text = xml.replace(/<w:tab\/>|<w:br\/>|<\/w:p>/g, " ").replace(/<[^>]+>/g, "");
+    } else if (ext === "pdf") {
+      if (!window.pdfjsLib) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+      for (let i = 1; i <= pdf.numPages; i++) text += " " + (await (await pdf.getPage(i)).getTextContent()).items.map((x) => x.str).join(" ");
+    } else throw new Error("unsupported");
+    return text.split(/\s+/).filter(Boolean).length;
+  }
+
+  view.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-dl]"); if (!b) return;
+    const [bucket, ...rest] = b.dataset.dl.split("|");
+    const { data, error } = await sb.storage.from(bucket).createSignedUrl(rest.join("|"), 60, { download: fileName(rest.join("|")) });
+    if (error) return alert(error.message);
+    window.open(data.signedUrl, "_blank");
+  });
+
+  view.addEventListener("change", async (e) => {
+    const id = e.target.dataset.up; if (!id || !e.target.files[0]) return;
+    const f = e.target.files[0];
+    if (f.size > 20 * 1024 * 1024) return alert("File is too large (max 20 MB).");
+    e.target.disabled = true;
+    const path = `${user.id}/${Date.now()}-${safeName(f.name)}`;
+    const up = await sb.storage.from(EDIT).upload(path, f);
+    if (up.error) { e.target.disabled = false; return alert(up.error.message); }
+    const { error } = await sb.from("orders").update({ result_path: path, status: "completed" }).eq("id", id);
+    if (error) { e.target.disabled = false; return alert(error.message); }
+    location.reload();
+  });
+
+  async function loadOrders() {
+    const { data, error } = await sb.from("orders")
+      .select("id,created_at,service,word_count,price,file_path,result_path,instructions,status,editor_id,customer:profiles!orders_customer_id_fkey(email,full_name),editor:profiles!orders_editor_id_fkey(email,full_name)")
+      .order("created_at", { ascending: false });
+    if (error) console.error(error);
+    return data || [];
+  }
+
+  /* ---------- customer ---------- */
+  async function customerView() {
+    view.innerHTML = `
+      <div class="panel"><h2>Submit a document</h2>
+        <form id="o-form">
+          <div class="row">
+            <div><label for="o-service">Service &amp; turnaround</label>
+              <select id="o-service">${PLANS.map(([id, label]) => `<option value="${id}">${esc(label)} — $${rates[id].toFixed(3)}/word</option>`).join("")}</select></div>
+            <div><label for="o-file">Document (.docx, .pdf or .txt, max 20 MB)</label>
+              <input id="o-file" type="file" accept=".docx,.pdf,.txt,.md" required></div>
+          </div>
+          <div class="quote-line"><span>Words: <b id="o-words">–</b></span><span>Estimated price: <b id="o-price">–</b></span></div>
+          <div id="o-manual" hidden><label for="o-manual-n">We couldn't count the words automatically. Enter the word count:</label><input id="o-manual-n" type="number" min="1"></div>
+          <label for="o-ins">Instructions (optional)</label><textarea id="o-ins" rows="3"></textarea>
+          <div class="alert" id="o-msg" hidden></div>
+          <button class="btn btn-primary" id="o-submit" style="margin-top:16px" type="submit">Upload &amp; submit order</button>
+        </form></div>
+      <div class="panel"><h2>My orders</h2><div id="o-list"></div></div>`;
+    let words = 0, counted = false;
+    const refresh = () => {
+      const price = words * (rates[$("#o-service").value] || 0);
+      $("#o-words").textContent = words ? words.toLocaleString() : "–";
+      $("#o-price").textContent = words ? money(price) : "–";
+    };
+    $("#o-service").onchange = refresh;
+    $("#o-manual-n").oninput = (e) => { words = parseInt(e.target.value, 10) || 0; refresh(); };
+    $("#o-file").onchange = async (e) => {
+      const f = e.target.files[0]; words = 0; counted = false; $("#o-manual").hidden = true; refresh();
+      if (!f) return;
+      if (f.size > 20 * 1024 * 1024) { e.target.value = ""; return note($("#o-msg"), "File is too large (max 20 MB).", false); }
+      $("#o-msg").hidden = true; $("#o-words").textContent = "counting…";
+      try { words = await countWords(f); counted = true; }
+      catch { $("#o-manual").hidden = false; }
+      refresh();
+    };
+    const draw = async () => {
+      const orders = await loadOrders();
+      $("#o-list").innerHTML = table(["Date", "Service", "Words", "Price", "Status", "Files"],
+        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${money(o.price)}</td><td>${chip(o.status)}</td>
+          <td>${dlBtn(CUST, o.file_path, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") : ""}</td></tr>`));
+    };
+    $("#o-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const f = $("#o-file").files[0];
+      if (!f || words < 1) return note($("#o-msg"), "Choose a document so we can count the words.", false);
+      const btn = $("#o-submit"); btn.disabled = true; btn.textContent = "Uploading…";
+      const path = `${user.id}/${Date.now()}-${safeName(f.name)}`;
+      const up = await sb.storage.from(CUST).upload(path, f);
+      if (up.error) { btn.disabled = false; btn.textContent = "Upload & submit order"; return note($("#o-msg"), up.error.message, false); }
+      const sel = $("#o-service");
+      const { error } = await sb.from("orders").insert({
+        customer_id: user.id, service: sel.options[sel.selectedIndex].text.split(" — ")[0],
+        word_count: words, price: Math.round(words * rates[sel.value] * 100) / 100,
+        file_path: path, instructions: $("#o-ins").value.trim(),
+      });
+      btn.disabled = false; btn.textContent = "Upload & submit order";
+      if (error) return note($("#o-msg"), error.message, false);
+      e.target.reset(); words = 0; refresh(); $("#o-manual").hidden = true;
+      note($("#o-msg"), "Order submitted. We'll be in touch shortly.", true); draw();
+    };
+    draw();
+  }
+
+  /* ---------- editor ---------- */
+  async function editorView() {
+    view.innerHTML = `<div class="panel"><h2>My assigned documents</h2><div id="e-list"></div></div>`;
+    const draw = async () => {
+      const orders = await loadOrders();
+      $("#e-list").innerHTML = table(["Date", "Service", "Words", "Instructions", "Customer file", "Status", "Return edited file"],
+        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${esc(o.instructions)}</td>
+          <td>${dlBtn(CUST, o.file_path, "Download")}</td>
+          <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1), o.status)}</select></td>
+          <td>${o.result_path ? dlBtn(EDIT, o.result_path, "Sent ✓") + " " : ""}<input type="file" class="file-sm" data-up="${esc(o.id)}"></td></tr>`));
+    };
+    view.onchange = async (e) => {
+      const id = e.target.dataset.status; if (!id) return;
+      const { error } = await sb.from("orders").update({ status: e.target.value }).eq("id", id);
+      if (error) alert(error.message);
+    };
+    draw();
+  }
+
+  /* ---------- manager (also used by admin) ---------- */
+  async function ordersPanel() {
+    const { data: editors } = await sb.from("profiles").select("id,email,full_name").eq("role", "editor");
+    const edOpts = (cur) => `<option value="">— unassigned —</option>` + (editors || []).map((x) => `<option value="${esc(x.id)}" ${x.id === cur ? "selected" : ""}>${esc(x.full_name || x.email)}</option>`).join("");
+    const orders = await loadOrders();
+    return `<div class="panel"><h2>All orders</h2>${table(["Date", "Customer", "Service", "Words", "Price", "Files", "Editor", "Status"],
+      orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.customer ? o.customer.full_name || o.customer.email : "")}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${money(o.price)}</td>
+        <td>${dlBtn(CUST, o.file_path, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")}</td>
+        <td><select class="sm" data-editor="${esc(o.id)}">${edOpts(o.editor_id)}</select></td>
+        <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS, o.status)}</select></td></tr>`))}</div>`;
+  }
+  function bindOrders() {
+    view.onchange = async (e) => {
+      const t = e.target;
+      if (t.dataset.editor) {
+        const patch = { editor_id: t.value || null };
+        const row = t.closest("tr").querySelector("[data-status]");
+        if (t.value && row.value === "new") { patch.status = "assigned"; row.value = "assigned"; }
+        const { error } = await sb.from("orders").update(patch).eq("id", t.dataset.editor);
+        if (error) alert(error.message);
+      } else if (t.dataset.status) {
+        const { error } = await sb.from("orders").update({ status: t.value }).eq("id", t.dataset.status);
+        if (error) alert(error.message);
+      }
+    };
+  }
+  async function managerView() { view.innerHTML = await ordersPanel(); bindOrders(); }
+
+  /* ---------- admin ---------- */
+  async function adminView() {
+    const draw = async () => {
+      const [{ data: invites }, { data: people }] = await Promise.all([
+        sb.from("staff_invites").select("*").order("created_at", { ascending: false }),
+        sb.from("profiles").select("id,email,full_name,role,created_at").order("created_at", { ascending: false }),
+      ]);
+      view.innerHTML = `
+        <div class="panel"><h2>Add a manager or editor</h2>
+          <p class="hint" style="margin-top:0">Enter their email and role. They then create their account on the login page using that same email.</p>
+          <form id="i-form" class="inline-form">
+            <input id="i-email" type="email" placeholder="name@example.com" required style="max-width:320px">
+            <select id="i-role" class="sm"><option value="manager">manager</option><option value="editor">editor</option></select>
+            <button class="btn btn-primary" type="submit">Add</button>
+          </form>
+          <div class="alert" id="i-msg" hidden></div>
+          ${(invites || []).length ? `<h3 style="margin-top:22px">Waiting to sign up</h3>` + table(["Email", "Role", ""],
+            invites.map((i) => `<tr><td>${esc(i.email)}</td><td>${esc(i.role)}</td><td><button class="btn btn-ghost btn-sm" data-del="${esc(i.email)}">Remove</button></td></tr>`)) : ""}
+        </div>
+        <div class="panel"><h2>People</h2>${table(["Name", "Email", "Role"],
+          (people || []).map((p) => `<tr><td>${esc(p.full_name)}</td><td>${esc(p.email)}</td><td>
+            <select class="sm" data-role="${esc(p.id)}" ${p.id === user.id ? "disabled" : ""}>${opts(["admin", "manager", "editor", "customer"], p.role)}</select></td></tr>`))}</div>
+        ${await ordersPanel()}`;
+      $("#i-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const email = $("#i-email").value.trim().toLowerCase(), role = $("#i-role").value;
+        const { data: ex } = await sb.from("profiles").select("id").eq("email", email).maybeSingle();
+        const { error } = ex
+          ? await sb.from("profiles").update({ role }).eq("id", ex.id)
+          : await sb.from("staff_invites").upsert({ email, role, invited_by: user.id });
+        if (error) return note($("#i-msg"), error.message, false);
+        await draw();
+        note($("#i-msg"), ex ? "That person already had an account; their role was updated." : "Added. Ask them to create their account with " + email + ".", true);
+      };
+    };
+    view.onclick = async (e) => {
+      const email = e.target.dataset.del; if (!email) return;
+      await sb.from("staff_invites").delete().eq("email", email); draw();
+    };
+    view.onchange = async (e) => {
+      const t = e.target;
+      if (t.dataset.role) {
+        const { error } = await sb.from("profiles").update({ role: t.value }).eq("id", t.dataset.role);
+        if (error) alert(error.message);
+      } else if (t.dataset.editor || t.dataset.status) {
+        bindOrdersHandler(t);
+      }
+    };
+    const bindOrdersHandler = async (t) => {
+      if (t.dataset.editor) {
+        const patch = { editor_id: t.value || null };
+        const row = t.closest("tr").querySelector("[data-status]");
+        if (t.value && row.value === "new") { patch.status = "assigned"; row.value = "assigned"; }
+        const { error } = await sb.from("orders").update(patch).eq("id", t.dataset.editor);
+        if (error) alert(error.message);
+      } else {
+        const { error } = await sb.from("orders").update({ status: t.value }).eq("id", t.dataset.status);
+        if (error) alert(error.message);
+      }
+    };
+    draw();
+  }
+
+  ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
+})();
+</script>
+</body>
+</html>
