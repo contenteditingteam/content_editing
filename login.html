@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Login | Content Editing</title>
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<meta name="description" content="Log in or create a Content Editing account to submit documents, track your orders and download your edited files.">
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="login.html">Login</a></li>
   </ul>
 </div></header>
@@ -20,7 +21,7 @@
 
 <section class="dash"><div class="container">
   <div class="auth-box">
-    <div class="tabs" role="tablist">
+    <div class="tabs">
       <button class="tab on" id="t-login" type="button">Login</button>
       <button class="tab" id="t-signup" type="button">Create account</button>
     </div>
@@ -44,7 +45,12 @@
   </div>
 </div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>About | Content Editing</title>
-<meta name="description" content="Content Editing provides human editing and proofreading for students, researchers, professionals and authors. Learn how we work.">
-<link rel="canonical" href="https://contentediting.online/about">
+<title>Verify a Certificate | Content Editing</title>
+<meta name="description" content="Check that a Content Editing certificate is genuine by entering its verification code.">
+<link rel="canonical" href="https://contentediting.online/verify">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Content Editing">
-<meta property="og:title" content="About | Content Editing">
-<meta property="og:description" content="Content Editing provides human editing and proofreading for students, researchers, professionals and authors. Learn how we work.">
-<meta property="og:url" content="https://contentediting.online/about">
+<meta property="og:title" content="Verify a Certificate | Content Editing">
+<meta property="og:description" content="Check that a Content Editing certificate is genuine by entering its verification code.">
+<meta property="og:url" content="https://contentediting.online/verify">
 <meta property="og:image" content="https://contentediting.online/images/logo.webp">
 <meta name="twitter:card" content="summary">
 
@@ -26,23 +26,16 @@
   </ul>
 </div></header>
 
-<div class="page-hero"><div class="container"><h1>About Content Editing</h1><p>Human editors who protect your credibility, clarity and results.</p></div></div>
+<div class="page-hero"><div class="container"><h1>Verify a Certificate</h1><p>Check that an editing certificate is genuine.</p></div></div>
 
-<section><div class="container" style="max-width:820px">
-  <h2 style="margin-bottom:12px">Our mission</h2>
-  <p style="color:var(--muted);margin-bottom:16px">Good ideas lose their force when the writing gets in the way. Content Editing helps students, researchers, professionals and authors say what they mean clearly and correctly.</p>
-  <p style="color:var(--muted);margin-bottom:16px">Software can catch a typo, but it cannot judge whether a paragraph persuades, whether a section is in the right place, or whether a sentence still sounds like you. That is the work of a human editor, and it is the only kind of editing we do.</p>
-  <p style="color:var(--muted);margin-bottom:24px">Every document is edited with Track Changes and comments, so you can see each change, accept the ones you like and learn from the rest. Your files are private and are only opened by the people working on your order.</p>
-  <h2 style="margin-bottom:12px">Our values</h2>
-  <ul class="checks"><li>Care: every document is read closely by a person, not just run through a tool.</li><li>Privacy: your files stay confidential and are never shared or reused.</li><li>Honesty: we edit your writing, we do not write it for you, and we say so when something needs your attention.</li><li>Clarity: simple per-word pricing, visible changes and a delivery time you can plan around.</li></ul>
-</div></section>
-
-<section class="alt"><div class="container">
-  <div class="section-head"><h2>How we handle your document</h2></div>
-  <div class="grid g3">
-    <div class="card"><h3>Matched to your work</h3><p>A manager reviews each order and assigns an editor who suits your document and service.</p></div>
-    <div class="card"><h3>Changes you can see</h3><p>Edits come back with Track Changes and comments, so you decide what to keep.</p></div>
-    <div class="card"><h3>Private by default</h3><p>Your files are stored privately and are only opened by the people working on your order.</p></div>
+<section class="dash"><div class="container">
+  <div class="auth-box">
+    <form id="v-form">
+      <label for="v-code">Verification code (printed under the QR code)</label>
+      <input id="v-code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" required>
+      <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Verify</button>
+    </form>
+    <div id="v-result"></div>
   </div>
 </div></section>
 
@@ -52,6 +45,33 @@
   <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
   <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
 </div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
 <script src="script.js"></script>
+<script>
+(() => {
+  const out = $("#v-result");
+  const check = async (code) => {
+    out.innerHTML = "";
+    const { data, error } = await sb.rpc("verify_certificate", { p_code: code });
+    if (error) { out.innerHTML = '<div class="alert err">Could not check this code right now. Please try again.</div>'; return; }
+    const c = data && data[0];
+    if (!c) { out.innerHTML = '<div class="alert err">No certificate was found for this code. Check it and try again.</div>'; return; }
+    out.innerHTML = `<div class="alert ok"><b>✓ This certificate is genuine.</b></div>
+      <div class="summary" style="margin-top:14px">
+        <div class="sum-row"><span>Certificate no.</span><b>${esc(c.certificate_no)}</b></div>
+        <div class="sum-row"><span>Issued to</span><b>${esc(c.customer_name)}</b></div>
+        <div class="sum-row"><span>Document</span><b>${esc(c.doc_title)}</b></div>
+        <div class="sum-row"><span>Service</span><b>${esc(c.service)}</b></div>
+        <div class="sum-row"><span>Words edited</span><b>${Number(c.word_count).toLocaleString()}</b></div>
+        <div class="sum-row"><span>Date completed</span><b>${new Date(c.certified_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</b></div>
+      </div>`;
+  };
+  $("#v-form").onsubmit = (e) => { e.preventDefault(); check($("#v-code").value); };
+  const c = new URLSearchParams(location.search).get("c");
+  if (c) { $("#v-code").value = c.match(/.{1,4}/g).join("-"); check(c); }
+})();
+</script>
 </body>
 </html>

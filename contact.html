@@ -3,38 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Submit Document | Content Edit</title>
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<title>Contact Content Editing | Questions, Quotes and Orders</title>
+<meta name="description" content="Questions about editing, proofreading or your order? Contact the Content Editing team.">
+<link rel="canonical" href="https://contentediting.online/contact">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Contact Content Editing | Questions, Quotes and Orders">
+<meta property="og:description" content="Questions about editing, proofreading or your order? Contact the Content Editing team.">
+<meta property="og:url" content="https://contentediting.online/contact">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<meta name="twitter:card" content="summary">
+
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
   </ul>
 </div></header>
 
-<div class="page-hero"><div class="container"><h1>Submit Your Document</h1><p>Tell us what you need and we'll reply with a quote and timeline.</p></div></div>
+<div class="page-hero"><div class="container"><h1>Contact Us</h1><p>Questions about editing, pricing or your order? Send us a message and we will reply by email.</p></div></div>
 
 <section><div class="container contact-grid">
-  <form class="quote-box" data-demo>
-    <label>Full name</label><input required>
-    <label>Email</label><input type="email" required>
-    <label>Service</label>
-    <select><option>Academic editing</option><option>Business editing</option><option>Proofreading</option><option>Book editing</option><option>Same-day editing</option><option>Rewriting</option></select>
-    <label>Word count</label><input type="number" min="0">
-    <label>Upload document</label><input type="file">
-    <label>Instructions</label><textarea rows="4"></textarea>
-    <p class="msg" style="color:var(--green);margin:10px 0"></p>
-    <button class="btn btn-primary" type="submit">Send Request</button>
+  <h2 class="sr-only">Send us a message</h2>
+  <form class="quote-box" id="c-form" novalidate>
+    <label for="c-name">Your name</label><input id="c-name" name="name" autocomplete="name" maxlength="120" required>
+    <label for="c-email">Email</label><input id="c-email" name="email" type="email" autocomplete="email" maxlength="200" required>
+    <label for="c-topic">What is it about?</label>
+    <select id="c-topic" name="topic"><option>A question about my document</option><option>Pricing or a custom quote</option><option>My order</option><option>Becoming an editor</option><option>Something else</option></select>
+    <label for="c-msg">Message</label><textarea id="c-msg" name="message" rows="5" minlength="10" maxlength="4000" required></textarea>
+    <div class="hp" aria-hidden="true"><label for="c-web">Leave this empty</label><input id="c-web" name="website" tabindex="-1" autocomplete="off"></div>
+    <div class="alert" id="c-msgbox" hidden></div>
+    <button class="btn btn-primary" id="c-send" style="margin-top:16px" type="submit">Send message</button>
   </form>
-  <div class="card"><h3>Contact details</h3><p>Email: hello@contentedit.com<br>Hours: Mon–Fri, 9am–6pm</p>
-    <div class="note">Demo form: it doesn't send anything yet. Connect it to Formspree, EmailJS or your own backend.</div></div>
+  <div class="card"><h3>Prefer to order now?</h3><p>If you already have a document, you don't need to write to us first. Upload it, see your price and delivery time straight away, and pay online.</p>
+    <p style="margin-top:14px"><a class="btn btn-primary" href="login.html">Get an instant quote</a></p>
+    <ul class="checks" style="margin-top:18px"><li>See your price before you pay</li><li>Edited by a human editor</li><li>Certificate included with every completed order</li></ul></div>
 </div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Edit. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="config.js"></script>
 <script src="script.js"></script>
+<script>
+(() => {
+  const f = document.getElementById("c-form"), box = document.getElementById("c-msgbox"), btn = document.getElementById("c-send");
+  const show = (t, ok) => { box.hidden = false; box.className = "alert " + (ok ? "ok" : "err"); box.textContent = t; };
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (f.website.value) { show("Thanks! We will reply soon.", true); f.reset(); return; } // spam trap: bots fill the hidden field
+    if (!f.checkValidity()) { f.reportValidity(); return; }
+    btn.disabled = true; btn.textContent = "Sending…";
+    try {
+      const res = await fetch(window.SUPABASE_URL + "/rest/v1/contact_messages", {
+        method: "POST",
+        headers: { apikey: window.SUPABASE_ANON_KEY, Authorization: "Bearer " + window.SUPABASE_ANON_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({ name: f.name.value.trim(), email: f.email.value.trim(), topic: f.topic.value, message: f.message.value.trim() }),
+      });
+      if (!res.ok) throw new Error(res.status);
+      show("Thanks! Your message has been sent. We will reply by email.", true); f.reset();
+    } catch (err) {
+      show("Sorry, your message could not be sent right now. Please try again in a little while.", false);
+    }
+    btn.disabled = false; btn.textContent = "Send message";
+  });
+})();
+</script>
 </body>
 </html>

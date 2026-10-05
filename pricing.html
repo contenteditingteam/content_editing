@@ -3,15 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pricing | Content Edit</title>
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<title>Pricing | Content Editing</title>
+<meta name="description" content="Simple per-word pricing for editing, proofreading and rewriting in US dollars or Indian rupees. See your exact price before you order.">
+<link rel="canonical" href="https://contentediting.online/pricing">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Pricing | Content Editing">
+<meta property="og:description" content="Simple per-word pricing for editing, proofreading and rewriting in US dollars or Indian rupees. See your exact price before you order.">
+<meta property="og:url" content="https://contentediting.online/pricing">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<meta name="twitter:card" content="summary">
+
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
   </ul>
 </div></header>
@@ -19,24 +29,62 @@
 <div class="page-hero"><div class="container"><h1>Transparent Pricing</h1><p>Simple per-word rates. The faster the turnaround, the higher the rate.</p></div></div>
 
 <section><div class="container">
-  <div class="table-wrap"><table>
-    <tr><th>Service</th><th>Turnaround</th><th>Price / word</th></tr>
-    <tr><td>Academic editing</td><td>5 days</td><td>$0.024</td></tr>
-    <tr><td>Academic editing</td><td>2 days</td><td>$0.035</td></tr>
-    <tr><td>Academic editing</td><td>1 day</td><td>$0.045</td></tr>
-    <tr><td>Proofreading</td><td>5 days</td><td>$0.018</td></tr>
-    <tr><td>Proofreading</td><td>1 day</td><td>$0.038</td></tr>
-    <tr><td>Business editing</td><td>3 days</td><td>$0.026</td></tr>
-    <tr><td>Same-day editing</td><td>4 hours</td><td>$0.065</td></tr>
-    <tr><td>Same-day editing</td><td>2 hours</td><td>$0.080</td></tr>
-    <tr><td>Developmental editing</td><td>14 days</td><td>$0.035</td></tr>
-    <tr><td>Rewriting</td><td>3 days</td><td>$0.050</td></tr>
-  </table></div>
-  <div class="note">These prices are placeholders — update them here and in <code>script.js</code> to match your real rates.</div>
-  <p style="text-align:center;margin-top:30px"><a class="btn btn-primary" href="index.html#quote">Calculate your price</a></p>
+  <div class="tabs" style="max-width:300px;margin:0 auto 34px" role="group" aria-label="Currency">
+    <button class="tab on" type="button" data-cur="USD">US dollar ($)</button>
+    <button class="tab" type="button" data-cur="INR">Indian rupee (₹)</button>
+  </div>
+  <h2 class="sr-only">Plans and prices</h2>
+  <div class="grid g3 plans">
+    <div class="plan popular"><span class="tag">Most popular</span>
+      <h3>Academic editing</h3><p class="plan-sub">Journal articles, theses and research papers, edited for language, clarity and structure.</p>
+      <ul class="plan-rows"><li><span>5 days</span><b data-usd="0.024"></b></li><li><span>2 days</span><b data-usd="0.035"></b></li><li><span>1 day</span><b data-usd="0.045"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-primary" href="login.html">Get an instant quote</a>
+    </div>
+    <div class="plan">
+      <h3>Proofreading</h3><p class="plan-sub">A final pass for spelling, grammar, punctuation and formatting.</p>
+      <ul class="plan-rows"><li><span>5 days</span><b data-usd="0.018"></b></li><li><span>2 days</span><b data-usd="0.028"></b></li><li><span>1 day</span><b data-usd="0.038"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-ghost" href="login.html">Get an instant quote</a>
+    </div>
+    <div class="plan">
+      <h3>Business editing</h3><p class="plan-sub">Reports, proposals and professional documents that read clearly and confidently.</p>
+      <ul class="plan-rows"><li><span>3 days</span><b data-usd="0.026"></b></li><li><span>1 day</span><b data-usd="0.04"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-ghost" href="login.html">Get an instant quote</a>
+    </div>
+    <div class="plan">
+      <h3>Same-day editing</h3><p class="plan-sub">Urgent documents returned in hours. Word limits apply to each speed.</p>
+      <ul class="plan-rows"><li><span>4 hours</span><b data-usd="0.065"></b></li><li><span>2 hours</span><b data-usd="0.08"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-ghost" href="login.html">Get an instant quote</a>
+    </div>
+    <div class="plan">
+      <h3>Developmental editing</h3><p class="plan-sub">Big-picture feedback on structure, argument and pacing for longer work.</p>
+      <ul class="plan-rows"><li><span>14 days</span><b data-usd="0.035"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-ghost" href="login.html">Get an instant quote</a>
+    </div>
+    <div class="plan">
+      <h3>Rewriting</h3><p class="plan-sub">Unclear drafts reworked into clear, original text that keeps your meaning.</p>
+      <ul class="plan-rows"><li><span>3 days</span><b data-usd="0.05"></b></li></ul>
+      <p class="plan-unit">per word</p>
+      <a class="btn btn-ghost" href="login.html">Get an instant quote</a>
+    </div>
+  </div>
+  <div class="included">
+    <div>Track Changes and comments</div><div>Clean final copy</div><div>Editing certificate</div><div>Private, secure files</div>
+  </div>
+  <div class="note" style="margin-top:34px">Rupee prices are converted at ₹85 per US dollar. Your exact price and delivery time are shown when you upload your document, before you pay. Placeholder rates: update the <code>data-usd</code> values here and the rates in <code>script.js</code> to match your real prices.</div>
+  <p style="text-align:center;margin-top:30px"><a class="btn btn-primary" href="index.html#quote">Try the price calculator</a></p>
 </div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Edit. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="script.js"></script>
 </body>
 </html>

@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard | Content Editing</title>
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css">
+<meta name="robots" content="noindex">
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
   </ul>
 </div></header>
@@ -23,7 +24,12 @@
 
 <section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
 
-<footer><div class="container"><div class="copy" style="border:0;margin:0">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
@@ -55,7 +61,7 @@
     ["business-3", "3-day business editing"], ["business-1", "1-day business editing"],
     ["rush-4h", "4-hour editing"], ["rush-2h", "2-hour editing"], ["dev-14", "Developmental editing (14 days)"], ["rewrite-3", "3-day rewriting"],
   ];
-  const money = (n) => "$" + Number(n || 0).toFixed(2);
+  const money = (n, cur = "USD") => (cur === "INR" ? "₹" + Math.round(n || 0).toLocaleString("en-IN") : "$" + Number(n || 0).toFixed(2));
   const fileName = (p) => String(p || "").split("/").pop().replace(/^\d+-/, "");
   const safeName = (n) => n.replace(/[^\w.\-]+/g, "_");
   const loadScript = (src) => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => no(new Error("Could not load " + src)); document.head.appendChild(s); });
@@ -69,7 +75,7 @@
       if (!window.JSZip) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");
       const zip = await JSZip.loadAsync(await file.arrayBuffer());
       const xml = await zip.file("word/document.xml").async("string");
-      text = xml.replace(/<w:tab\/>|<w:br\/>|<\/w:p>/g, " ").replace(/<[^>]+>/g, "");
+      text = xml.replace(/<w:del[ >][\s\S]*?<\/w:del>/g, "").replace(/<w:tab\/>|<w:br\/>|<\/w:p>/g, " ").replace(/<[^>]+>/g, "");
     } else if (ext === "pdf") {
       if (!window.pdfjsLib) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -79,7 +85,111 @@
     return text.split(/\s+/).filter(Boolean).length;
   }
 
+  // ----- reviews: customers write one, managers/admins publish or hide it -----
+  const reviewDialog = document.createElement("dialog");
+  reviewDialog.id = "rv-dlg";
+  reviewDialog.innerHTML = `<form method="dialog" id="rv-form">
+    <h3 style="margin-bottom:6px">How was your experience?</h3>
+    <p class="hint" style="margin:0 0 10px;text-align:left">Your review will be shown on our site after approval, with your first name and last initial.</p>
+    <div id="rv-stars" class="rate" role="radiogroup" aria-label="Rating">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-s="${n}" aria-label="${n} star${n > 1 ? "s" : ""}">★</button>`).join("")}</div>
+    <label for="rv-body">Your review</label><textarea id="rv-body" rows="4" maxlength="1500" placeholder="What did you like? How did the editing help?" required></textarea>
+    <div class="alert" id="rv-msg" hidden></div>
+    <div class="inline-form" style="margin-top:16px"><button class="btn btn-primary" id="rv-send" type="submit">Submit review</button><button class="btn btn-ghost" id="rv-cancel" type="button">Cancel</button></div>
+  </form>`;
+  document.body.appendChild(reviewDialog);
+  let rvOrder = null, rvRating = 0;
+  const paintStars = () => reviewDialog.querySelectorAll("[data-s]").forEach((b) => b.classList.toggle("on", +b.dataset.s <= rvRating));
+  reviewDialog.querySelector("#rv-stars").onclick = (e) => { const b = e.target.closest("[data-s]"); if (b) { rvRating = +b.dataset.s; paintStars(); } };
+  reviewDialog.querySelector("#rv-cancel").onclick = () => reviewDialog.close();
+  reviewDialog.querySelector("#rv-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = reviewDialog.querySelector("#rv-msg"), btn = reviewDialog.querySelector("#rv-send");
+    if (!rvRating) return note(msg, "Please choose a star rating.", false);
+    btn.disabled = true;
+    const { error } = await sb.from("reviews").insert({ order_id: rvOrder, customer_id: user.id, rating: rvRating, body: reviewDialog.querySelector("#rv-body").value.trim() });
+    btn.disabled = false;
+    if (error) return note(msg, /duplicate|unique/i.test(error.message) ? "You have already reviewed this order." : error.message, false);
+    reviewDialog.close(); document.dispatchEvent(new Event("orders-changed"));
+  };
+
+  async function messagesPanel() {
+    const { data } = await sb.from("contact_messages").select("id,created_at,name,email,topic,message,handled").order("created_at", { ascending: false }).limit(50);
+    return `<div class="panel"><h2>Website messages</h2><p class="hint" style="margin-top:0;text-align:left">Messages sent from the Contact page. Reply by email, then mark as handled.</p>${table(["Date", "From", "About", "Message", "Status", ""],
+      (data || []).map((m) => `<tr><td>${fmt(m.created_at)}</td><td>${esc(m.name)}<br><a href="mailto:${esc(m.email)}">${esc(m.email)}</a></td><td>${esc(m.topic)}</td><td style="max-width:340px;white-space:pre-wrap">${esc(m.message)}</td>
+        <td>${m.handled ? '<span class="chip completed">handled</span>' : '<span class="chip new">new</span>'}</td>
+        <td><button class="btn btn-ghost btn-sm" data-msg-toggle="${esc(m.id)}|${m.handled ? "reopen" : "done"}">${m.handled ? "Reopen" : "Mark handled"}</button> <button class="btn btn-ghost btn-sm" data-msg-del="${esc(m.id)}">Delete</button></td></tr>`))}</div>`;
+  }
+
+  async function reviewsPanel() {
+    const { data } = await sb.from("reviews").select("id,created_at,rating,body,display_name,approved").order("created_at", { ascending: false });
+    return `<div class="panel"><h2>Customer reviews</h2><p class="hint" style="margin-top:0;text-align:left">Reviews are hidden until you publish them.</p>${table(["Date", "Customer", "Rating", "Review", "Status", ""],
+      (data || []).map((r) => `<tr><td>${fmt(r.created_at)}</td><td>${esc(r.display_name)}</td><td><span class="stars">${"★".repeat(r.rating)}</span></td><td style="max-width:360px">${esc(r.body)}</td>
+        <td>${r.approved ? '<span class="chip completed">published</span>' : '<span class="chip new">pending</span>'}</td>
+        <td><button class="btn btn-ghost btn-sm" data-rv-toggle="${esc(r.id)}|${r.approved ? "hide" : "show"}">${r.approved ? "Hide" : "Publish"}</button> <button class="btn btn-ghost btn-sm" data-rv-del="${esc(r.id)}">Delete</button></td></tr>`))}</div>`;
+  }
+
   view.addEventListener("click", async (e) => {
+    const mt = e.target.closest("[data-msg-toggle]");
+    if (mt) {
+      const [id, act] = mt.dataset.msgToggle.split("|");
+      const { error } = await sb.from("contact_messages").update({ handled: act === "done" }).eq("id", id);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
+    const md = e.target.closest("[data-msg-del]");
+    if (md) {
+      if (!confirm("Delete this message permanently?")) return;
+      const { error } = await sb.from("contact_messages").delete().eq("id", md.dataset.msgDel);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
+    const rvb = e.target.closest("[data-review]");
+    if (rvb) { rvOrder = rvb.dataset.review; rvRating = 0; paintStars(); reviewDialog.querySelector("#rv-body").value = ""; reviewDialog.querySelector("#rv-msg").hidden = true; reviewDialog.showModal(); return; }
+    const tg = e.target.closest("[data-rv-toggle]");
+    if (tg) {
+      const [id, act] = tg.dataset.rvToggle.split("|");
+      const { error } = await sb.from("reviews").update({ approved: act === "show" }).eq("id", id);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
+    const rd = e.target.closest("[data-rv-del]");
+    if (rd) {
+      if (!confirm("Delete this review permanently?")) return;
+      const { error } = await sb.from("reviews").delete().eq("id", rd.dataset.rvDel);
+      if (error) return alert(error.message);
+      return location.reload();
+    }
+    const pay = e.target.closest("[data-pay]");
+    if (pay) {
+      const orderId = pay.dataset.pay;
+      pay.disabled = true; pay.textContent = "Opening…";
+      const reset = () => { pay.disabled = false; pay.textContent = "Pay now"; };
+      const { data: p, error: pErr } = await sb.functions.invoke("payments", { body: { action: "create", order_id: orderId } });
+      if (pErr || !p || p.error) { reset(); console.error(pErr); return alert((p && p.error) || "Could not start the payment. Please try again."); }
+      if (p.paid) return location.reload();
+      try { if (!window.Razorpay) await loadScript("https://checkout.razorpay.com/v1/checkout.js"); }
+      catch { reset(); return alert("Could not load the payment window. Check your connection."); }
+      new Razorpay({
+        key: p.key_id, amount: p.amount, currency: p.currency, order_id: p.razorpay_order_id,
+        name: "Content Editing", description: p.description,
+        prefill: { name: me.full_name || "", email: me.email },
+        theme: { color: "#0b3a7a" },
+        modal: { ondismiss: reset },
+        handler: async (r) => {
+          const { data: c, error: cErr } = await sb.functions.invoke("payments", { body: { action: "confirm", order_id: orderId, ...r } });
+          if (cErr || !c || c.error) alert("Payment received but not confirmed yet. It will update shortly; if it does not, contact us.");
+          location.reload();
+        },
+      }).open();
+      return;
+    }
+    const rc = e.target.closest("[data-verify]");
+    if (rc) {
+      rc.disabled = true; rc.textContent = "Checking…";
+      const { error } = await sb.functions.invoke("verify-order", { body: { order_id: rc.dataset.verify } });
+      if (error) { rc.disabled = false; rc.textContent = "Re-check"; return alert("Could not verify this order automatically."); }
+      return location.reload();
+    }
     const b = e.target.closest("[data-dl]"); if (!b) return;
     const [bucket, ...rest] = b.dataset.dl.split("|");
     const { data, error } = await sb.storage.from(bucket).createSignedUrl(rest.join("|"), 60, { download: fileName(rest.join("|")) });
@@ -102,71 +212,177 @@
 
   async function loadOrders() {
     const { data, error } = await sb.from("orders")
-      .select("id,created_at,service,word_count,price,file_path,result_path,instructions,status,editor_id,customer:profiles!orders_customer_id_fkey(email,full_name),editor:profiles!orders_editor_id_fkey(email,full_name)")
+      .select("id,created_at,service,word_count,price,currency,rush,plan,verified_at,verify_note,payment_status,paid_at,certificate_no,doc_title,file_path,file_paths,result_path,instructions,status,editor_id,customer:profiles!orders_customer_id_fkey(email,full_name),editor:profiles!orders_editor_id_fkey(email,full_name)")
       .order("created_at", { ascending: false });
     if (error) console.error(error);
     return data || [];
   }
 
   /* ---------- customer ---------- */
+  // Quote settings: change these numbers to change the quote form.
+  const PRICING = {
+    RUSH_MULT: 2,              // rush delivery multiplies the price by this
+    INR_RATE: 85,              // 1 US dollar = this many rupees
+    MAX_FILES: 5,
+    MAX_MB: 20,
+    EXTRA_HOURS_PER_10K: 24,   // extra delivery time for every additional 10,000 words
+    HOURS: {                   // base delivery time of each plan, in hours
+      "academic-5": 120, "academic-2": 48, "academic-1": 24, "proof-5": 120, "proof-2": 48, "proof-1": 24,
+      "business-3": 72, "business-1": 24, "rush-4h": 4, "rush-2h": 2, "dev-14": 336, "rewrite-3": 72,
+    },
+  };
+  const isRushPlan = (id) => id.startsWith("rush-");
+  const roundPrice = (p, c) => (c === "INR" ? Math.round(p) : Math.round(p * 100) / 100);
+  const duration = (h) => (h < 24 ? `${h} hour${h > 1 ? "s" : ""}` : `${Math.ceil(h / 24)} day${Math.ceil(h / 24) > 1 ? "s" : ""}`);
+  const filesOf = (o) => (o.file_paths && o.file_paths.length ? o.file_paths : o.file_path ? [o.file_path] : []);
+  const priceCell = (o) => money(o.price, o.currency) + (o.verified_at ? ' <span title="Counted and priced by our system">✓</span>' : ` <span class="chip warn" title="${esc(o.verify_note || "Being checked")}">${o.verify_note ? "to be confirmed" : "checking…"}</span>`);
+  const payChip = (o) => o.payment_status === "paid" ? '<span class="chip completed">paid</span>' : '<span class="chip new">unpaid</span>';
+  const payCell = (o) => o.payment_status === "paid" ? payChip(o)
+    : o.verified_at ? `<button class="btn btn-primary btn-sm" data-pay="${esc(o.id)}">Pay now</button>` : '<span class="chip new">awaiting check</span>';
+  const certBtn = (o) => o.certificate_no ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="certificate.html?o=${esc(o.id)}">Certificate</a>` : "";
+  const fileBtns = (o, prefix) => filesOf(o).map((p, i, a) => dlBtn(CUST, p, a.length > 1 ? `${prefix} ${i + 1}` : prefix)).join(" ");
+
   async function customerView() {
+    const items = []; // { file, words, state: 'counting' | 'ok' | 'manual' }
+    let currency = getCur(); // same remembered choice as the public pages (script.js)
+    let rush = false;
+
     view.innerHTML = `
-      <div class="panel"><h2>Submit a document</h2>
+      <div class="panel"><h2>Get a quote &amp; submit your documents</h2>
         <form id="o-form">
           <div class="row">
-            <div><label for="o-service">Service &amp; turnaround</label>
-              <select id="o-service">${PLANS.map(([id, label]) => `<option value="${id}">${esc(label)} — $${rates[id].toFixed(3)}/word</option>`).join("")}</select></div>
-            <div><label for="o-file">Document (.docx, .pdf or .txt, max 20 MB)</label>
-              <input id="o-file" type="file" accept=".docx,.pdf,.txt,.md" required></div>
+            <div><label for="o-service">Service &amp; turnaround</label><select id="o-service"></select></div>
+            <div><label for="o-cur">Currency</label>
+              <select id="o-cur"><option value="USD">US dollar ($)</option><option value="INR">Indian rupee (₹)</option></select></div>
           </div>
-          <div class="quote-line"><span>Words: <b id="o-words">–</b></span><span>Estimated price: <b id="o-price">–</b></span></div>
-          <div id="o-manual" hidden><label for="o-manual-n">We couldn't count the words automatically. Enter the word count:</label><input id="o-manual-n" type="number" min="1"></div>
+          <label class="drop" id="o-drop">
+            <input id="o-file" type="file" multiple accept=".docx,.pdf,.txt,.md">
+            <strong>Drag &amp; drop your documents here</strong>
+            <span>or click to browse · .docx, .pdf or .txt · up to ${PRICING.MAX_FILES} files, ${PRICING.MAX_MB} MB each</span>
+          </label>
+          <div id="o-files"></div>
+          <label for="o-title">Document title <small style="font-weight:400;color:var(--muted)">(printed on your editing certificate)</small></label><input id="o-title" maxlength="200" placeholder="e.g. Effects of sleep on memory in students">
+          <label class="check"><input type="checkbox" id="o-rush"> <span>Rush delivery <small id="o-rush-note"></small></span></label>
+          <div class="summary" id="o-sum"></div>
           <label for="o-ins">Instructions (optional)</label><textarea id="o-ins" rows="3"></textarea>
           <div class="alert" id="o-msg" hidden></div>
           <button class="btn btn-primary" id="o-submit" style="margin-top:16px" type="submit">Upload &amp; submit order</button>
         </form></div>
       <div class="panel"><h2>My orders</h2><div id="o-list"></div></div>`;
-    let words = 0, counted = false;
-    const refresh = () => {
-      const price = words * (rates[$("#o-service").value] || 0);
-      $("#o-words").textContent = words ? words.toLocaleString() : "–";
-      $("#o-price").textContent = words ? money(price) : "–";
+
+    const sel = $("#o-service");
+    const perWord = (id) => (currency === "INR" ? "₹" + (rates[id] * PRICING.INR_RATE).toFixed(2) : "$" + rates[id].toFixed(3));
+    const buildPlans = () => {
+      const keep = sel.value;
+      sel.innerHTML = PLANS.map(([id, label]) => `<option value="${id}">${esc(label)} — ${perWord(id)}/word</option>`).join("");
+      if (keep) sel.value = keep;
     };
-    $("#o-service").onchange = refresh;
-    $("#o-manual-n").oninput = (e) => { words = parseInt(e.target.value, 10) || 0; refresh(); };
-    $("#o-file").onchange = async (e) => {
-      const f = e.target.files[0]; words = 0; counted = false; $("#o-manual").hidden = true; refresh();
-      if (!f) return;
-      if (f.size > 20 * 1024 * 1024) { e.target.value = ""; return note($("#o-msg"), "File is too large (max 20 MB).", false); }
-      $("#o-msg").hidden = true; $("#o-words").textContent = "counting…";
-      try { words = await countWords(f); counted = true; }
-      catch { $("#o-manual").hidden = false; }
-      refresh();
+    const calc = () => {
+      const plan = sel.value, words = items.reduce((s, i) => s + (i.words || 0), 0);
+      const rushOn = rush && !isRushPlan(plan);
+      const usd = words * rates[plan] * (rushOn ? PRICING.RUSH_MULT : 1);
+      let hours = PRICING.HOURS[plan];
+      if (hours >= 24) hours += Math.floor(Math.max(0, words - 1) / 10000) * PRICING.EXTRA_HOURS_PER_10K;
+      if (rushOn) hours = Math.max(4, Math.ceil(hours / 2));
+      return { plan, words, rushOn, hours, price: roundPrice(currency === "INR" ? usd * PRICING.INR_RATE : usd, currency) };
     };
+    const renderSummary = () => {
+      const q = calc(), rushBox = $("#o-rush");
+      rushBox.disabled = isRushPlan(q.plan);
+      if (rushBox.disabled) { rushBox.checked = false; rush = false; }
+      $("#o-rush-note").textContent = isRushPlan(q.plan) ? "(already included in this plan)" : `(${PRICING.RUSH_MULT}× price, about half the time)`;
+      $("#o-sum").innerHTML = q.words
+        ? `<div class="sum-row"><span>Words</span><b>${q.words.toLocaleString()}</b></div>
+           <div class="sum-row"><span>Rate</span><b>${perWord(q.plan)} / word${q.rushOn ? ` × ${PRICING.RUSH_MULT} rush` : ""}</b></div>
+           <div class="sum-row"><span>Estimated delivery</span><b>${duration(q.hours)}${q.rushOn ? " (rush)" : ""}</b></div>
+           <div class="sum-row total"><span>Total price</span><b>${money(q.price, currency)}</b></div>`
+        : `<p class="hint" style="margin:0">Add a document to see your price and delivery time.</p>`;
+    };
+    const renderFiles = () => {
+      $("#o-files").innerHTML = items.map((it, i) => `<div class="file-row"><span class="fname">${esc(it.file.name)}</span>
+        ${it.state === "counting" ? `<em>counting words…</em>`
+          : it.state === "manual" ? `<span>couldn't count — enter words: <input class="num" type="number" min="1" data-manual="${i}" value="${it.words || ""}"></span>`
+          : `<b>${it.words.toLocaleString()} words</b>`}
+        <button type="button" class="x" data-rm="${i}" aria-label="Remove ${esc(it.file.name)}">×</button></div>`).join("");
+    };
+    const addFiles = (list) => {
+      const msg = $("#o-msg"); msg.hidden = true;
+      for (const f of Array.from(list)) {
+        const ext = f.name.split(".").pop().toLowerCase();
+        if (!["docx", "pdf", "txt", "md"].includes(ext)) { note(msg, `${f.name}: only .docx, .pdf and .txt files are supported.`, false); continue; }
+        if (f.size > PRICING.MAX_MB * 1024 * 1024) { note(msg, `${f.name} is larger than ${PRICING.MAX_MB} MB.`, false); continue; }
+        if (items.length >= PRICING.MAX_FILES) { note(msg, `You can add up to ${PRICING.MAX_FILES} files per order.`, false); break; }
+        if (items.some((i) => i.file.name === f.name && i.file.size === f.size)) continue;
+        const it = { file: f, words: 0, state: "counting" };
+        items.push(it);
+        countWords(f).then((n) => { it.words = n; it.state = "ok"; }, () => { it.state = "manual"; })
+          .finally(() => { renderFiles(); renderSummary(); });
+      }
+      renderFiles(); renderSummary();
+    };
+
+    $("#o-cur").value = currency;
+    buildPlans(); renderSummary();
+    sel.onchange = renderSummary;
+    $("#o-cur").onchange = (e) => { currency = e.target.value; try { localStorage.setItem("ce_currency", currency); } catch {} buildPlans(); renderSummary(); };
+    $("#o-rush").onchange = (e) => { rush = e.target.checked; renderSummary(); };
+    $("#o-file").onchange = (e) => { addFiles(e.target.files); e.target.value = ""; };
+    const drop = $("#o-drop");
+    ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
+    drop.addEventListener("drop", (e) => { e.preventDefault(); addFiles(e.dataTransfer.files); });
+    $("#o-files").onclick = (e) => { const b = e.target.closest("[data-rm]"); if (b) { items.splice(+b.dataset.rm, 1); renderFiles(); renderSummary(); } };
+    $("#o-files").oninput = (e) => { const i = e.target.dataset.manual; if (i !== undefined) { items[+i].words = parseInt(e.target.value, 10) || 0; renderSummary(); } };
+
     const draw = async () => {
-      const orders = await loadOrders();
-      $("#o-list").innerHTML = table(["Date", "Service", "Words", "Price", "Status", "Files"],
-        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${money(o.price)}</td><td>${chip(o.status)}</td>
-          <td>${dlBtn(CUST, o.file_path, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") : ""}</td></tr>`));
+      const [orders, { data: myReviews }] = await Promise.all([loadOrders(), sb.from("reviews").select("order_id,approved")]);
+      const reviewed = new Map((myReviews || []).map((r) => [r.order_id, r]));
+      const reviewCell = (o) => {
+        if (o.status !== "completed") return "";
+        const r = reviewed.get(o.id);
+        return r ? `<span class="chip ${r.approved ? "completed" : "new"}">${r.approved ? "review published" : "review pending"}</span>`
+                 : `<button class="btn btn-ghost btn-sm" data-review="${esc(o.id)}">Leave a review</button>`;
+      };
+      $("#o-list").innerHTML = table(["Date", "Service", "Words", "Price", "Payment", "Status", "Files"],
+        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payCell(o)}</td><td>${chip(o.status)}</td>
+          <td>${fileBtns(o, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") + " " + certBtn(o) + " " + reviewCell(o) : ""}</td></tr>`));
     };
+    document.addEventListener("orders-changed", draw);
+
     $("#o-form").onsubmit = async (e) => {
       e.preventDefault();
-      const f = $("#o-file").files[0];
-      if (!f || words < 1) return note($("#o-msg"), "Choose a document so we can count the words.", false);
-      const btn = $("#o-submit"); btn.disabled = true; btn.textContent = "Uploading…";
-      const path = `${user.id}/${Date.now()}-${safeName(f.name)}`;
-      const up = await sb.storage.from(CUST).upload(path, f);
-      if (up.error) { btn.disabled = false; btn.textContent = "Upload & submit order"; return note($("#o-msg"), up.error.message, false); }
-      const sel = $("#o-service");
-      const { error } = await sb.from("orders").insert({
-        customer_id: user.id, service: sel.options[sel.selectedIndex].text.split(" — ")[0],
-        word_count: words, price: Math.round(words * rates[sel.value] * 100) / 100,
-        file_path: path, instructions: $("#o-ins").value.trim(),
-      });
-      btn.disabled = false; btn.textContent = "Upload & submit order";
-      if (error) return note($("#o-msg"), error.message, false);
-      e.target.reset(); words = 0; refresh(); $("#o-manual").hidden = true;
-      note($("#o-msg"), "Order submitted. We'll be in touch shortly.", true); draw();
+      const msg = $("#o-msg"), btn = $("#o-submit"), label = "Upload & submit order";
+      if (!items.length) return note(msg, "Add at least one document first.", false);
+      if (items.some((i) => i.state === "counting")) return note(msg, "Please wait until all files are counted.", false);
+      if (items.some((i) => !i.words)) return note(msg, "Enter the word count for every file.", false);
+      const q = calc();
+      btn.disabled = true;
+      const paths = [], stamp = Date.now();
+      for (let i = 0; i < items.length; i++) {
+        btn.textContent = `Uploading ${i + 1} of ${items.length}…`;
+        const path = `${user.id}/${stamp + i}-${safeName(items[i].file.name)}`;
+        const up = await sb.storage.from(CUST).upload(path, items[i].file);
+        if (up.error) {
+          if (paths.length) await sb.storage.from(CUST).remove(paths);
+          btn.disabled = false; btn.textContent = label;
+          return note(msg, up.error.message, false);
+        }
+        paths.push(path);
+      }
+      const { data: created, error } = await sb.from("orders").insert({
+        customer_id: user.id, service: PLANS.find((p) => p[0] === q.plan)[1] + (q.rushOn ? " + rush" : ""),
+        plan: q.plan, doc_title: $("#o-title").value.trim() || items[0].file.name.replace(/.[^.]+$/, ""), word_count: q.words, price: q.price, currency, rush: q.rushOn,
+        file_path: paths[0], file_paths: paths, instructions: $("#o-ins").value.trim(),
+      }).select("id").single();
+      btn.disabled = false; btn.textContent = label;
+      if (error) { await sb.storage.from(CUST).remove(paths); return note(msg, error.message, false); }
+      items.length = 0; $("#o-ins").value = ""; $("#o-title").value = ""; $("#o-rush").checked = false; rush = false;
+      renderFiles(); renderSummary();
+      note(msg, "Order submitted. Checking your word count…", true);
+      const { data: v, error: vErr } = await sb.functions.invoke("verify-order", { body: { order_id: created.id } });
+      if (vErr || !v || v.error) note(msg, "Order submitted. Our team will confirm the final word count and price.", true);
+      else note(msg, `Order submitted. Verified: ${v.words.toLocaleString()} words, total ${money(v.price, v.currency)}. Use "Pay now" below to start your order.`, true);
+      draw();
     };
     draw();
   }
@@ -178,7 +394,7 @@
       const orders = await loadOrders();
       $("#e-list").innerHTML = table(["Date", "Service", "Words", "Instructions", "Customer file", "Status", "Return edited file"],
         orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${esc(o.instructions)}</td>
-          <td>${dlBtn(CUST, o.file_path, "Download")}</td>
+          <td>${fileBtns(o, "Download")}</td>
           <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1), o.status)}</select></td>
           <td>${o.result_path ? dlBtn(EDIT, o.result_path, "Sent ✓") + " " : ""}<input type="file" class="file-sm" data-up="${esc(o.id)}"></td></tr>`));
     };
@@ -195,10 +411,10 @@
     const { data: editors } = await sb.from("profiles").select("id,email,full_name").eq("role", "editor");
     const edOpts = (cur) => `<option value="">— unassigned —</option>` + (editors || []).map((x) => `<option value="${esc(x.id)}" ${x.id === cur ? "selected" : ""}>${esc(x.full_name || x.email)}</option>`).join("");
     const orders = await loadOrders();
-    return `<div class="panel"><h2>All orders</h2>${table(["Date", "Customer", "Service", "Words", "Price", "Files", "Editor", "Status"],
-      orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.customer ? o.customer.full_name || o.customer.email : "")}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${money(o.price)}</td>
-        <td>${dlBtn(CUST, o.file_path, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")}</td>
-        <td><select class="sm" data-editor="${esc(o.id)}">${edOpts(o.editor_id)}</select></td>
+    return `<div class="panel"><h2>All orders</h2>${table(["Date", "Customer", "Service", "Words", "Price", "Payment", "Files", "Editor", "Status"],
+      orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.customer ? o.customer.full_name || o.customer.email : "")}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payChip(o)}</td>
+        <td>${fileBtns(o, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")} ${certBtn(o)} ${o.verified_at ? "" : `<button class="btn btn-ghost btn-sm" data-verify="${esc(o.id)}">Re-check</button>`}</td>
+        <td><select class="sm" data-editor="${esc(o.id)}" ${o.payment_status === "paid" ? "" : 'disabled title="Assign after payment"'}>${edOpts(o.editor_id)}</select></td>
         <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS, o.status)}</select></td></tr>`))}</div>`;
   }
   function bindOrders() {
@@ -216,7 +432,7 @@
       }
     };
   }
-  async function managerView() { view.innerHTML = await ordersPanel(); bindOrders(); }
+  async function managerView() { view.innerHTML = (await ordersPanel()) + (await messagesPanel()) + (await reviewsPanel()); bindOrders(); }
 
   /* ---------- admin ---------- */
   async function adminView() {
@@ -240,7 +456,9 @@
         <div class="panel"><h2>People</h2>${table(["Name", "Email", "Role"],
           (people || []).map((p) => `<tr><td>${esc(p.full_name)}</td><td>${esc(p.email)}</td><td>
             <select class="sm" data-role="${esc(p.id)}" ${p.id === user.id ? "disabled" : ""}>${opts(["admin", "manager", "editor", "customer"], p.role)}</select></td></tr>`))}</div>
-        ${await ordersPanel()}`;
+        ${await ordersPanel()}
+        ${await messagesPanel()}
+        ${await reviewsPanel()}`;
       $("#i-form").onsubmit = async (e) => {
         e.preventDefault();
         const email = $("#i-email").value.trim().toLowerCase(), role = $("#i-role").value;

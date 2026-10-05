@@ -14,14 +14,34 @@ $$('.page-hero').forEach(p=>p.insertAdjacentHTML('afterbegin','<div class="blob 
 
 /* price calculator (rates in USD per word — edit to your own pricing) */
 const rates={'academic-5':0.024,'academic-2':0.035,'academic-1':0.045,'proof-5':0.018,'proof-2':0.028,'proof-1':0.038,'business-3':0.026,'business-1':0.040,'rush-4h':0.065,'rush-2h':0.080,'dev-14':0.035,'rewrite-3':0.050};
-const sel=$('#q-service'),words=$('#q-words'),ppw=$('#q-ppw'),tot=$('#q-total');
+/* currency: USD or INR (INR_RATE = rupees per 1 US dollar; keep in sync with PRICING in dashboard.html and verify-order) */
+const INR_RATE=85;
+const getCur=()=>{try{const c=localStorage.getItem('ce_currency');if(c==='USD'||c==='INR')return c}catch(e){}return /^Asia\/(Calcutta|Kolkata)$/.test(Intl.DateTimeFormat().resolvedOptions().timeZone||'')?'INR':'USD'};
+let ccy=getCur();
+const fmtMoney=(usd,c,dp)=>c==='INR'?'₹'+(usd*INR_RATE).toLocaleString('en-IN',{minimumFractionDigits:dp,maximumFractionDigits:dp}):'$'+usd.toFixed(dp);
+const setCur=(c)=>{ccy=c;try{localStorage.setItem('ce_currency',c)}catch(e){}document.dispatchEvent(new Event('currencychange'))};
+
+const sel=$('#q-service'),words=$('#q-words'),ppw=$('#q-ppw'),tot=$('#q-total'),curSel=$('#q-cur');
 function calc(){
   if(!sel)return;
   const r=rates[sel.value]||0,w=Math.max(0,parseInt(words.value)||0);
-  ppw.textContent='$'+r.toFixed(3);tot.textContent='$'+(r*w).toFixed(2);
+  ppw.textContent=fmtMoney(r,ccy,ccy==='INR'?2:3);tot.textContent=fmtMoney(r*w,ccy,ccy==='INR'?0:2);
   tot.classList.add('pop');setTimeout(()=>tot.classList.remove('pop'),180);
 }
-sel&&[sel,words].forEach(e=>e.addEventListener('input',calc));calc();
+sel&&[sel,words].forEach(e=>e.addEventListener('input',calc));
+if(curSel){curSel.value=ccy;curSel.addEventListener('change',()=>setCur(curSel.value))}
+document.addEventListener('currencychange',()=>{if(curSel)curSel.value=ccy;calc()});
+calc();
+
+/* pricing page: every element with data-usd shows its USD price in the chosen currency */
+const priceCells=$$('[data-usd]'),curBtns=$$('[data-cur]');
+function renderPrices(){
+  priceCells.forEach(el=>el.textContent=fmtMoney(parseFloat(el.dataset.usd),ccy,ccy==='INR'?2:3));
+  curBtns.forEach(b=>b.classList.toggle('on',b.dataset.cur===ccy));
+}
+curBtns.forEach(b=>b.addEventListener('click',()=>setCur(b.dataset.cur)));
+document.addEventListener('currencychange',renderPrices);
+renderPrices();
 
 $$('form[data-demo]').forEach(f=>f.addEventListener('submit',e=>{
   e.preventDefault();$('.msg',f).textContent='Thanks! This is a demo form — connect it to your email/backend.';
@@ -58,38 +78,52 @@ function count(el){
 /* rotating hero word */
 const rot=$('#rot');
 if(rot){const w=['academics','researchers','businesses','authors','students'];let i=0;
-  setInterval(()=>{i=(i+1)%w.length;rot.style.animation='none';rot.offsetWidth;rot.textContent=w[i];rot.style.animation=''},3200)}
+  setInterval(()=>{i=(i+1)%w.length;rot.style.animation='none';rot.offsetWidth;rot.textContent=w[i];rot.style.animation='wordin .6s cubic-bezier(.2,.7,.2,1)'},3200)}
 
-/* header hide/show + progress + parallax + horizontal scroll (smoothed) */
+/* header hide/show + progress + parallax + horizontal scroll (smoothed).
+   The loop runs only while something is moving (scroll, mouse, easing) and reads layout once per resize, not every frame. */
 const header=$('header'),hs=$('.hscroll'),track=$('.htrack'),hbar=$('.hbar i');
-let lastY=0,mx=innerWidth/2,my=innerHeight/2,gx=mx,gy=my,cur=0;
-function sizeH(){if(!hs)return;hs.style.height=(track.scrollWidth-innerWidth+innerHeight+120)+'px'}
-addEventListener('resize',sizeH);addEventListener('load',sizeH);sizeH();
+const speedEls=$$('[data-speed]'),fwraps=$$('.fwrap');
+let lastY=0,mx=innerWidth/2,my=innerHeight/2,gx=mx,gy=my,cur=0,rafOn=false;
+let docMax=0,hsTop=0,hsSpan=1,trackW=0;
+function measure(){
+  if(hs){hs.style.height=(track.scrollWidth-innerWidth+innerHeight+120)+'px'}
+  docMax=document.documentElement.scrollHeight-innerHeight;
+  if(hs){hsTop=hs.getBoundingClientRect().top+scrollY;hsSpan=Math.max(1,hs.offsetHeight-innerHeight);trackW=track.scrollWidth-innerWidth}
+}
+function kick(){if(!rafOn&&!reduce){rafOn=true;requestAnimationFrame(frame)}}
 function frame(){
-  const y=scrollY,max=document.documentElement.scrollHeight-innerHeight;
-  bar.style.transform=`scaleX(${max>0?y/max:0})`;
+  rafOn=false;
+  const y=scrollY;let moving=false;
+  bar.style.transform=`scaleX(${docMax>0?y/docMax:0})`;
   header.classList.toggle('scrolled',y>40);
   header.classList.toggle('hide',y>lastY&&y>300&&!navUl.classList.contains('open'));lastY=y;
-  $$('[data-speed]').forEach(el=>el.style.transform=`translate3d(0,${y*el.dataset.speed}px,0)`);
+  speedEls.forEach(el=>el.style.transform=`translate3d(0,${y*el.dataset.speed}px,0)`);
   if(hs){
-    const r=hs.getBoundingClientRect(),span=hs.offsetHeight-innerHeight;
-    const target=Math.min(Math.max(-r.top/span,0),1);
+    const target=Math.min(Math.max((y-hsTop)/hsSpan,0),1);
     cur+=(target-cur)*.09;
-    track.style.transform=`translate3d(${-cur*(track.scrollWidth-innerWidth)}px,0,0)`;
+    if(Math.abs(target-cur)>.0005)moving=true;else cur=target;
+    track.style.transform=`translate3d(${-cur*trackW}px,0,0)`;
     hbar.style.transform=`scaleX(${cur})`;
   }
   gx+=(mx-gx)*.12;gy+=(my-gy)*.12;
+  if(Math.abs(mx-gx)>.4||Math.abs(my-gy)>.4)moving=true;
   glow.style.transform=`translate(${gx}px,${gy}px)`;
-  requestAnimationFrame(frame);
+  if(moving)kick();
 }
-if(!reduce)requestAnimationFrame(frame);else{header.classList.add('scrolled')}
+addEventListener('scroll',kick,{passive:true});
+addEventListener('resize',()=>{measure();kick()});
+addEventListener('load',()=>{measure();kick()});
+if('ResizeObserver' in window)new ResizeObserver(()=>{measure();kick()}).observe(document.body);
+measure();
+if(!reduce)kick();else{header.classList.add('scrolled')}
 
 /* mouse: glow, hero parallax, card tilt, magnetic buttons */
 if(fine&&!reduce){
   addEventListener('mousemove',e=>{
-    mx=e.clientX;my=e.clientY;glow.style.opacity=1;
+    mx=e.clientX;my=e.clientY;glow.style.opacity=1;kick();
     const cx=(e.clientX/innerWidth-.5),cy=(e.clientY/innerHeight-.5);
-    $$('.fwrap').forEach(el=>{const d=+el.dataset.depth||20;el.style.transform=`translate(${-cx*d*2}px,${-cy*d*2}px)`});
+    fwraps.forEach(el=>{const d=+el.dataset.depth||20;el.style.transform=`translate(${-cx*d*2}px,${-cy*d*2}px)`});
   });
   $$('.card,.hcard,.quote-box').forEach(c=>{
     c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;

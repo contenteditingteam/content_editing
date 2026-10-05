@@ -3,9 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Content Edit | Professional Editing & Proofreading Services</title>
-<meta name="description" content="Content Edit offers expert human editing and proofreading for academic manuscripts, business documents and books, with fast turnaround and a free editing certificate.">
-<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");</script><link rel="icon" href="images/logo.webp"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="skyline/skyline.css">
+<title>Content Editing | Professional Editing & Proofreading Services</title>
+<link rel="canonical" href="https://contentediting.online/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Content Editing">
+<meta property="og:title" content="Content Editing | Professional Editing & Proofreading Services">
+<meta property="og:description" content="Content Editing offers expert human editing and proofreading for academic manuscripts, business documents and books, with fast turnaround and a free editing certificate.">
+<meta property="og:url" content="https://contentediting.online/">
+<meta property="og:image" content="https://contentediting.online/images/logo.webp">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Content Editing","url":"https://contentediting.online","logo":"https://contentediting.online/images/logo.webp","description":"Human editing and proofreading for academics, businesses and authors."}</script>
+
+<meta name="description" content="Content Editing offers expert human editing and proofreading for academic manuscripts, business documents and books, with fast turnaround and a free editing certificate.">
+<!-- Google tag (gtag.js) --><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-SMDSWJ5T0V");(function(){var d=0;function l(){if(d)return;d=1;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-SMDSWJ5T0V";document.head.appendChild(s)}["scroll","click","touchstart","keydown"].forEach(function(e){addEventListener(e,l,{once:true,passive:true})});addEventListener("load",function(){setTimeout(l,3000)})})();</script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css"><link rel="preconnect" href="https://furnjgsmfigplxmgwjmm.supabase.co" crossorigin>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -20,12 +30,12 @@
 </defs></svg>
 
 <header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a>
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
     <li><a href="index.html">Home</a></li>
     <li><a href="services.html">Services</a></li>
-    <li><a href="pricing.html">Pricing</a></li>
+    <li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="contact.html">Contact</a></li>
     <li><a class="btn btn-primary" href="login.html">Submit Document</a></li>
@@ -36,7 +46,7 @@
   <div class="blob b1" data-speed=".12"></div><div class="blob b2" data-speed=".2"></div><div class="blob b3" data-speed=".08"></div><div class="grid-bg"></div>
   <div class="container hero-grid">
     <div>
-      <span class="badge"><i></i> Human editors online now</span>
+      <span class="badge"><span aria-hidden="true">✓</span> Edited by humans, not AI</span>
       <h1>
         <span class="ln"><span style="--i:0">Perfect words</span></span>
         <span class="ln"><span style="--i:1">for <span class="rot-wrap"><span id="rot">academics</span></span></span></span>
@@ -87,16 +97,12 @@
   <div class="blob b1"></div><div class="blob b3"></div>
   <div class="container stats-grid">
     <div><b data-count="2" data-suffix=" hr">0</b><span>Fastest turnaround</span></div>
-    <div><b data-count="100" data-suffix="%">0</b><span>Human editors</span></div>
-    <div><b data-count="8">0</b><span>Editing services</span></div>
-    <div><b data-count="50" data-suffix="+">0</b><span>Subject areas</span></div>
+    <div><b data-count="12">0</b><span>Editing services</span></div>
+    <div><b data-count="2">0</b><span>Currencies: USD &amp; INR</span></div>
+    <div><b data-count="100" data-suffix="%">0</b><span>Human editing</span></div>
   </div>
 </section>
 
-<section id="activity"><div class="container">
-  <div class="section-head"><h2>Our year in <span class="grad-text">edits</span></h2><p>Every block is a day of editing work. Drag the skyline to rotate it, or switch to the flat view. (Sample data — connect your real numbers.)</p></div>
-  <div id="skyline-root"></div>
-</div></section>
 
 <section class="alt" id="quote"><div class="container quote">
   <div>
@@ -114,6 +120,8 @@
       <optgroup label="Same-Day"><option value="rush-4h">4-hour editing</option><option value="rush-2h">2-hour editing</option></optgroup>
       <optgroup label="Other"><option value="dev-14">Developmental editing (14 days)</option><option value="rewrite-3">3-day rewriting</option></optgroup>
     </select>
+    <label for="q-cur">Currency</label>
+    <select id="q-cur"><option value="USD">US dollar ($)</option><option value="INR">Indian rupee (₹)</option></select>
     <label for="q-words">Number of words</label>
     <input id="q-words" type="number" min="0" value="2000">
     <div style="display:flex;justify-content:space-between;margin-top:14px;color:var(--muted)"><span>Price per word</span><b id="q-ppw"></b></div>
@@ -135,13 +143,13 @@
 <section class="alt"><div class="container">
   <div class="section-head"><h2>See the <span class="grad-text">difference</span></h2><p>A sample of the improvements our editors make.</p></div>
   <div class="compare">
-    <div class="box"><h4>Before</h4><p>The results <del>was shown to be</del> significant, <del>however</del> more research <del>are</del> needed <del>for to</del> confirm the <del>finding's</del>.</p></div>
-    <div class="box after"><h4>After</h4><p>The results <ins>were</ins> significant<ins>;</ins> <ins>however,</ins> more research <ins>is</ins> needed <ins>to</ins> confirm the <ins>findings</ins>.</p></div>
+    <div class="box"><h3>Before</h3><p>The results <del>was shown to be</del> significant, <del>however</del> more research <del>are</del> needed <del>for to</del> confirm the <del>finding's</del>.</p></div>
+    <div class="box after"><h3>After</h3><p>The results <ins>were</ins> significant<ins>;</ins> <ins>however,</ins> more research <ins>is</ins> needed <ins>to</ins> confirm the <ins>findings</ins>.</p></div>
   </div>
 </div></section>
 
 <section><div class="container">
-  <div class="section-head"><h2>Why choose <span class="grad-text">Content Edit?</span></h2></div>
+  <div class="section-head"><h2>Why choose <span class="grad-text">Content Editing?</span></h2></div>
   <div class="grid g4">
     <div class="card"><div class="ico">🎯</div><h3>Qualified editors</h3><p>Editors matched to your subject area and writing goals.</p></div>
     <div class="card"><div class="ico">🌍</div><h3>Global clients</h3><p>Supporting students, researchers and companies in many countries.</p></div>
@@ -150,14 +158,11 @@
   </div>
 </div></section>
 
-<section class="alt"><div class="container">
-  <div class="section-head"><h2>What clients <span class="grad-text">say</span></h2><p>Sample testimonials — replace with real client feedback.</p></div>
-  <div class="grid g3 testi">
-    <div class="card"><div class="stars">★★★★★</div><q>My manuscript came back clear and journal-ready.</q><small>— Researcher, Biology</small></div>
-    <div class="card"><div class="stars">★★★★★</div><q>Fast, professional, and the tracked changes taught me a lot.</q><small>— PhD Student</small></div>
-    <div class="card"><div class="stars">★★★★★</div><q>Our reports now read sharper and more confident.</q><small>— Operations Manager</small></div>
-  </div>
-</div></section>
+<section class="alt" id="home-reviews" hidden>
+  <div class="container"><div class="section-head"><h2>Read our real customer <span class="grad-text">reviews</span></h2><p id="hr-sub"></p></div></div>
+  <div class="rv-marquee"><div class="rv-track" id="hr-list"></div></div>
+  <p style="text-align:center;margin-top:28px"><a class="btn btn-ghost" href="reviews.html">Read all reviews</a></p>
+</section>
 
 <section><div class="container faq" style="max-width:800px">
   <div class="section-head"><h2>Frequently asked <span class="grad-text">questions</span></h2></div>
@@ -165,17 +170,41 @@
   <details><summary>Will my content stay confidential?</summary><p>Yes. Files are only accessed by your assigned editor and are never shared.</p></details>
   <details><summary>Do you offer an editing certificate?</summary><p>Yes, a certificate is included free with every order for journal or institutional requirements.</p></details>
   <details><summary>Can I request revisions?</summary><p>Yes, you can ask follow-up questions or request a re-check at no extra cost.</p></details>
+  <details><summary>What is the difference between editing and proofreading?</summary><p>Proofreading is a final pass that fixes spelling, grammar, punctuation and formatting. Editing goes further: it improves wording, flow and structure, so the writing is clearer as well as correct.</p></details>
+  <details><summary>How long will my document take?</summary><p>It depends on the plan you choose and the length of the document. Your estimated delivery time is shown in your quote before you pay, and rush options are available for urgent work.</p></details>
+  <details><summary>Will you change my meaning or my voice?</summary><p>No. Editors correct and clarify, and they mark every change with Track Changes. If something is unclear, they leave a comment for you instead of guessing.</p></details>
+  <details><summary>Do you use AI to edit my document?</summary><p>No. Your document is edited by a human editor. We do not feed your files into AI tools.</p></details>
+  <details><summary>What is an editing certificate?</summary><p>A certificate is a document that confirms your work was professionally edited. Some journals and universities ask for one with a submission.</p></details>
 </div></section>
 
 <div class="cta-band"><div class="container"><h2>Ready to polish your writing?</h2><p>Submit your document today and get it back error-free.</p><a class="btn" href="login.html">Submit Your Document</a></div></div>
 
 <footer><div class="container"><div class="f-grid">
-  <div><a href="index.html" class="logo"><img src="images/logo.webp" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
-  <div><h4>Services</h4><ul><li><a href="services.html#academic">Academic Editing</a></li><li><a href="services.html#business">Business Editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book Editing</a></li></ul></div>
-  <div><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-  <div><h4>Contact</h4><ul><li>hello@contentedit.com</li><li>Mon–Fri, 9am–6pm</li></ul></div>
-</div><div class="copy">© 2026 Content Edit. All rights reserved.</div></div></footer>
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="config.js"></script>
+<script src="reviews-data.js"></script>
+<script src="reviews-ui.js"></script>
+<script>
+(async () => {
+  await new Promise((go) => ("requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 1500))); // reviews are not needed for first paint
+  const { loadReviews, card, isPreview } = CEReviews;
+  const { real, shown } = await loadReviews(15);
+  if (!shown.length) return; // nothing real to show yet: the section stays hidden
+  const row = shown.map(card).join("");
+  const copy = shown.length < 4 ? "" : row.replaceAll('class="rv-card', 'aria-hidden="true" class="rv-card dup'); // second copy lets the row loop without a gap
+  const list = document.getElementById("hr-list");
+  list.innerHTML = row + copy;
+  list.parentElement.classList.toggle("few", shown.length < 4);
+  document.getElementById("hr-sub").textContent = real.length
+    ? real.length + " review" + (real.length === 1 ? "" : "s") + " from our customers."
+    : "Preview mode: sample cards are only visible on your own computer.";
+  document.getElementById("home-reviews").hidden = false;
+})();
+</script>
 <script src="script.js"></script>
-<script type="module" src="skyline/skyline.js"></script>
 </body>
 </html>
