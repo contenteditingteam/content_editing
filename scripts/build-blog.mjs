@@ -113,6 +113,7 @@ writeFileSync("robots.txt", `User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /certificate
+Disallow: /profile
 
 Sitemap: ${SITE}/sitemap.xml
 `)

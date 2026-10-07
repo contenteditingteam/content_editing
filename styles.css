@@ -407,3 +407,15 @@ dialog#od-dlg::backdrop{background:rgba(6,26,58,.55);backdrop-filter:blur(3px)}
 .info-row small{display:block;color:var(--muted);margin-top:2px;font-weight:400}
 .info-row.clickable{cursor:pointer}.info-row input[type=checkbox]{width:20px;height:20px;flex:none;padding:0}
 @media(max-width:600px){.wstep{padding:20px 16px}.seg{flex-wrap:wrap}}
+
+/* profile page */
+.pf-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--violet));color:#fff;display:grid;place-items:center;font-size:1.6rem;font-weight:800;flex:none}
+.pf-id{flex:1;min-width:200px}.pf-id h2{margin:0 0 4px}.pf-id p{color:var(--muted);margin:0;overflow-wrap:anywhere}
+.pf-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:12px}
+.pf-stat{background:linear-gradient(135deg,var(--sky),#f4efff);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.pf-stat b{font-size:1.7rem;color:var(--navy)}.pf-stat span{color:var(--muted);font-size:.88rem}
+.pf-dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px 24px;margin:12px 0}
+.pf-dl dt{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.pf-dl dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.hero-link{margin-left:8px;border-color:rgba(255,255,255,.7);color:#fff}
+.nav ul a.active{color:var(--yellow)}

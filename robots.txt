@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /certificate
+Disallow: /profile
 
 Sitemap: https://contentediting.online/sitemap.xml

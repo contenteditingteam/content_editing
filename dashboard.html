@@ -12,18 +12,17 @@
   <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li><li><a href="profile.html">My profile</a></li>
     <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
   </ul>
 </div></header>
 
 <div class="page-hero"><div class="container">
   <h1 id="who">Loading…</h1>
-  <p><span class="role" id="role"></span></p>
+  <p><span class="role" id="role"></span> <a class="btn btn-ghost btn-sm hero-link" href="profile.html">My profile</a></p>
 </div></div>
 
 <section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
-<section class="dash" style="padding-top:0"><div class="container" id="acct-wrap"></div></section>
 
 <footer><div class="container"><div class="f-grid">
   <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
@@ -655,47 +654,7 @@
     draw();
   }
 
-  /* ---------- my account (every role) ---------- */
-  function profilePanel() {
-    const isCustomer = me.role === "customer";
-    $("#acct-wrap").insertAdjacentHTML("beforeend", `<div class="panel" id="acct"><h2>My account</h2>
-      <form id="pf-name" class="inline-form"><label class="sr-only" for="pf-n">Full name</label><input id="pf-n" maxlength="120" value="${esc(me.full_name || "")}" required><button class="btn btn-ghost btn-sm" type="submit">Save name</button></form>
-      <form id="pf-pass" class="inline-form" style="margin-top:12px"><label class="sr-only" for="pf-p">New password</label><input id="pf-p" type="password" minlength="8" autocomplete="new-password" placeholder="New password (min 8 characters)" required><button class="btn btn-ghost btn-sm" type="submit">Change password</button></form>
-      <div class="alert" id="pf-msg" hidden></div>
-      ${isCustomer ? `<h3 class="od-h" style="margin-top:26px">Delete my account</h3>
-        <p class="hint" style="text-align:left;margin:0 0 8px">This permanently removes your account, your uploaded and edited files, your orders and your reviews. It cannot be undone. Orders being edited must be delivered first. See our <a href="privacy.html">Privacy policy</a>.</p>
-        <form id="pf-del" class="inline-form"><label class="sr-only" for="pf-d">Type DELETE to confirm</label><input id="pf-d" autocomplete="off" placeholder="Type DELETE to confirm"><button class="btn btn-ghost btn-sm" type="submit">Delete my account</button></form>` : ""}
-    </div>`);
-    const msg = $("#pf-msg");
-    $("#pf-name").onsubmit = async (e) => {
-      e.preventDefault();
-      const { error } = await sb.rpc("update_my_name", { p_name: $("#pf-n").value });
-      if (error) return note(msg, error.message, false);
-      me.full_name = $("#pf-n").value.trim(); $("#who").textContent = me.full_name || me.email;
-      note(msg, "Name saved.", true);
-    };
-    $("#pf-pass").onsubmit = async (e) => {
-      e.preventDefault();
-      const { error } = await sb.auth.updateUser({ password: $("#pf-p").value });
-      if (error) return note(msg, error.message, false);
-      $("#pf-p").value = ""; note(msg, "Password changed.", true);
-    };
-    const del = $("#pf-del");
-    if (del) del.onsubmit = async (e) => {
-      e.preventDefault();
-      if ($("#pf-d").value.trim() !== "DELETE") return note(msg, "Type DELETE (in capital letters) to confirm.", false);
-      if (!confirm("Delete your account and all your files permanently?")) return;
-      const { data, error } = await sb.functions.invoke("delete-account");
-      let text = data && data.error;
-      if (error && !text) { try { text = (await error.context.json()).error; } catch { text = "Could not delete the account. Please contact us."; } }
-      if (text) return note(msg, text, false);
-      await sb.auth.signOut();
-      location.replace("index.html");
-    };
-  }
-
-  await ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
-  profilePanel();
+  ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
 })();
 </script>
 </body>
