@@ -383,3 +383,27 @@ dialog#od-dlg::backdrop{background:rgba(6,26,58,.55);backdrop-filter:blur(3px)}
 .chip.cancelled{background:#fde4e4;color:#a33}
 #od-send input{flex:1;min-width:180px}
 .od-head>div{min-width:0;flex:1}.od-head .btn{flex:none;white-space:nowrap}
+
+/* new-order wizard */
+.wiz{padding:0;overflow:hidden}
+.wstep{padding:26px 28px;border-bottom:1px solid var(--line)}
+.wstep:last-child{border-bottom:0}
+.wstep .wsum{display:none;align-items:center;gap:14px}
+.wstep .wsum b{display:block}.wstep .wsum small{color:var(--muted)}
+.wstep .wsum .link{margin-left:auto;background:none;border:0;color:var(--navy);font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+.wstep .tick{width:28px;height:28px;border-radius:50%;background:#d9f7e7;color:#166b47;display:grid;place-items:center;font-weight:800;flex:none}
+.wstep.done .wsum{display:flex}.wstep.done .wbody{display:none}
+.wstep.locked{opacity:.55;pointer-events:none}.wstep.locked .wbody>*:not(h2){display:none}
+.wstep h2{display:flex;align-items:center;gap:12px;font-size:1.25rem;margin-bottom:4px}
+.snum{width:30px;height:30px;border-radius:50%;background:var(--sky);color:var(--navy);display:grid;place-items:center;font-size:.95rem;font-weight:800;flex:none}
+.seg{display:flex;gap:10px}.seg button{flex:1;padding:12px;border-radius:12px;border:1px solid #cfd8e6;background:#fff;font:inherit;font-weight:700;cursor:pointer;color:var(--ink)}
+.seg button.on{border-color:var(--navy);background:#f1f6ff;color:var(--navy);box-shadow:0 0 0 2px rgba(11,58,122,.12)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.opt{display:flex;flex-direction:column;gap:6px;text-align:left;padding:18px;border-radius:16px;border:1px solid #cfd8e6;background:#fff;font:inherit;color:var(--ink);cursor:pointer;transition:.2s}
+.opt:hover{border-color:var(--navy);transform:translateY(-2px)}
+.opt.on{border-color:var(--navy);background:#f6f9ff;box-shadow:0 0 0 2px rgba(11,58,122,.14)}
+.opt b{font-size:1rem}.opt small{color:var(--muted);line-height:1.45;flex:1}.opt em{font-style:normal;font-weight:800;color:var(--navy)}
+.info-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;margin-top:12px}
+.info-row small{display:block;color:var(--muted);margin-top:2px;font-weight:400}
+.info-row.clickable{cursor:pointer}.info-row input[type=checkbox]{width:20px;height:20px;flex:none;padding:0}
+@media(max-width:600px){.wstep{padding:20px 16px}.seg{flex-wrap:wrap}}
