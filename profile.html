@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My profile | Content Editing</title>
+<meta name="robots" content="noindex">
+<script src="/consent.js" defer></script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div class="container nav">
+  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
+  <button class="menu-btn" aria-label="Menu">☰</button>
+  <ul>
+    <li><a href="index.html">Home</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="profile.html" class="active">My profile</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
+  </ul>
+</div></header>
+
+<div class="page-hero"><div class="container">
+  <h1 id="who">My profile</h1>
+  <p><span class="role" id="role"></span></p>
+</div></div>
+
+<section class="dash"><div class="container" id="view"><p>Loading your profile…</p></div></section>
+
+<footer><div class="container"><div class="f-grid">
+  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
+  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
+  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul><p class="f-title" style="margin-top:18px">Legal</p><ul><li><a href="terms.html">Terms of service</a></li><li><a href="privacy.html">Privacy policy</a></li><li><a href="refunds.html">Refunds &amp; revisions</a></li><li><a href="#" data-cookie-settings>Cookie settings</a></li></ul></div>
+</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script>
+(async () => {
+  const user = await getUser();
+  if (!user) return location.replace("login.html");
+  const { data: me } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  if (!me) { await sb.auth.signOut(); return location.replace("login.html"); }
+
+  const view = $("#view");
+  const note = (el, text, ok) => { el.hidden = false; el.className = "alert " + (ok ? "ok" : "err"); el.textContent = text; };
+  const when = (d) => (d ? new Date(d).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—");
+  const day = (d) => (d ? new Date(d).toLocaleDateString(undefined, { dateStyle: "medium" }) : "—");
+  const initials = (n) => (String(n || me.email).trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("") || "?").toUpperCase();
+  const ROLE_TEXT = { customer: "Customer", editor: "Editor", manager: "Manager", admin: "Admin" };
+  const isCustomer = me.role === "customer", isStaff = me.role === "manager" || me.role === "admin";
+
+  $("#who").textContent = me.full_name || me.email;
+  $("#role").textContent = me.role;
+  $("#logout").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
+
+  // What each role sees in "Your activity" (the database already limits orders to the ones this person may see)
+  const { data: orders } = await sb.from("orders").select("status,payment_status,word_count,editor_id");
+  const o = orders || [];
+  const count = (f) => o.filter(f).length;
+  const sum = (f) => o.filter(f).reduce((s, x) => s + (x.word_count || 0), 0);
+  let stats = [];
+  if (isCustomer) stats = [["Orders placed", o.length], ["Paid", count((x) => x.payment_status === "paid")], ["Awaiting payment", count((x) => x.payment_status !== "paid" && x.status !== "cancelled")], ["Delivered", count((x) => x.status === "completed")]];
+  else if (me.role === "editor") stats = [["Assigned to you", o.length], ["In progress", count((x) => x.status === "assigned" || x.status === "in_progress")], ["Delivered", count((x) => x.status === "completed")], ["Words delivered", sum((x) => x.status === "completed").toLocaleString()]];
+  else stats = [["All orders", o.length], ["Paid, not yet assigned", count((x) => x.payment_status === "paid" && !x.editor_id && x.status === "new")], ["In progress", count((x) => x.status === "assigned" || x.status === "in_progress")], ["Delivered", count((x) => x.status === "completed")]];
+  if (me.role === "admin") {
+    const { count: team } = await sb.from("profiles").select("id", { count: "exact", head: true }).in("role", ["manager", "editor"]);
+    stats.push(["Team members", team ?? 0]);
+  }
+
+  view.innerHTML = `
+    <div class="panel pf-head">
+      <div class="avatar" aria-hidden="true">${esc(initials(me.full_name))}</div>
+      <div class="pf-id"><h2 id="pf-title">${esc(me.full_name || "Your name")}</h2><p>${esc(me.email)} · <span class="chip completed">${esc(ROLE_TEXT[me.role] || me.role)}</span></p></div>
+      <a class="btn btn-ghost btn-sm" href="dashboard.html">Back to dashboard</a>
+    </div>
+
+    <div class="panel"><h2>Your activity</h2>
+      <div class="pf-stats">${stats.map(([k, v]) => `<div class="pf-stat"><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join("")}</div>
+    </div>
+
+    <div class="panel"><h2>Account details</h2>
+      <dl class="pf-dl">
+        <div><dt>Email</dt><dd>${esc(me.email)}</dd></div>
+        <div><dt>Role</dt><dd>${esc(ROLE_TEXT[me.role] || me.role)}</dd></div>
+        <div><dt>Member since</dt><dd>${esc(day(me.created_at || user.created_at))}</dd></div>
+        <div><dt>Last sign-in</dt><dd>${esc(when(user.last_sign_in_at))}</dd></div>
+        ${isCustomer ? `<div><dt>Terms accepted</dt><dd>${esc(me.terms_accepted_at ? when(me.terms_accepted_at) : "Not recorded")}</dd></div>` : ""}
+      </dl>
+      <p class="hint" style="text-align:left">Your email and role can't be changed here. ${isStaff || me.role === "editor" ? "Ask an admin if your role is wrong." : "Contact us if you need to change your email."}</p>
+    </div>
+
+    <div class="panel"><h2>Edit profile</h2>
+      <form id="pf-name" class="inline-form"><label class="sr-only" for="pf-n">Full name</label><input id="pf-n" maxlength="120" value="${esc(me.full_name || "")}" required><button class="btn btn-primary btn-sm" type="submit">Save name</button></form>
+      <div class="alert" id="pf-msg1" hidden></div>
+    </div>
+
+    <div class="panel"><h2>Security and sign out</h2>
+      <form id="pf-pass" class="inline-form"><label class="sr-only" for="pf-p">New password</label><input id="pf-p" type="password" minlength="8" autocomplete="new-password" placeholder="New password (min 8 characters)" required><button class="btn btn-ghost btn-sm" type="submit">Change password</button></form>
+      <div class="alert" id="pf-msg2" hidden></div>
+      <div class="inline-form" style="margin-top:18px">
+        <button class="btn btn-primary btn-sm" type="button" id="pf-out">Log out</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="pf-all">Log out on all devices</button>
+      </div>
+    </div>
+
+    ${isCustomer ? `<div class="panel"><h2>Delete my account</h2>
+      <p class="hint" style="text-align:left;margin:0 0 10px">This permanently removes your account, your uploaded and edited files, your orders and your reviews. It cannot be undone. Orders being edited must be delivered first. See our <a href="privacy.html">Privacy policy</a>.</p>
+      <form id="pf-del" class="inline-form"><label class="sr-only" for="pf-d">Type DELETE to confirm</label><input id="pf-d" autocomplete="off" placeholder="Type DELETE to confirm"><button class="btn btn-ghost btn-sm" type="submit">Delete my account</button></form>
+      <div class="alert" id="pf-msg3" hidden></div></div>` : ""}`;
+
+  $("#pf-name").onsubmit = async (e) => {
+    e.preventDefault();
+    const m = $("#pf-msg1");
+    const { error } = await sb.rpc("update_my_name", { p_name: $("#pf-n").value });
+    if (error) return note(m, error.message, false);
+    me.full_name = $("#pf-n").value.trim();
+    $("#who").textContent = me.full_name || me.email; $("#pf-title").textContent = me.full_name;
+    view.querySelector(".avatar").textContent = initials(me.full_name);
+    note(m, "Name saved.", true);
+  };
+  $("#pf-pass").onsubmit = async (e) => {
+    e.preventDefault();
+    const m = $("#pf-msg2");
+    const { error } = await sb.auth.updateUser({ password: $("#pf-p").value });
+    if (error) return note(m, error.message, false);
+    $("#pf-p").value = ""; note(m, "Password changed.", true);
+  };
+  $("#pf-out").onclick = async () => { await sb.auth.signOut(); location.replace("login.html"); };
+  $("#pf-all").onclick = async () => { await sb.auth.signOut({ scope: "global" }); location.replace("login.html"); };
+  const del = $("#pf-del");
+  if (del) del.onsubmit = async (e) => {
+    e.preventDefault();
+    const m = $("#pf-msg3");
+    if ($("#pf-d").value.trim() !== "DELETE") return note(m, "Type DELETE (in capital letters) to confirm.", false);
+    if (!confirm("Delete your account and all your files permanently?")) return;
+    const { data, error } = await sb.functions.invoke("delete-account");
+    let text = data && data.error;
+    if (error && !text) { try { text = (await error.context.json()).error; } catch { text = "Could not delete the account. Please contact us."; } }
+    if (text) return note(m, text, false);
+    await sb.auth.signOut();
+    location.replace("index.html");
+  };
+})();
+</script>
+</body>
+</html>

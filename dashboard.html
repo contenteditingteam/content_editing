@@ -12,18 +12,17 @@
   <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
   <button class="menu-btn" aria-label="Menu">☰</button>
   <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li><li><a href="profile.html">My profile</a></li>
     <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
   </ul>
 </div></header>
 
 <div class="page-hero"><div class="container">
   <h1 id="who">Loading…</h1>
-  <p><span class="role" id="role"></span></p>
+  <p><span class="role" id="role"></span> <a class="btn btn-ghost btn-sm hero-link" href="profile.html">My profile</a></p>
 </div></div>
 
 <section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
-<section class="dash" style="padding-top:0"><div class="container" id="acct-wrap"></div></section>
 
 <footer><div class="container"><div class="f-grid">
   <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
@@ -325,56 +324,120 @@
   async function customerView() {
     const items = []; // { file, words, state: 'counting' | 'ok' | 'manual' }
     let currency = getCur(); // same remembered choice as the public pages (script.js)
-    let rush = false;
+    let rush = false, step = 1, spelling = "US English";
+    // Services shown as cards in step 2. Each lists the turnaround plans (ids of PLANS / rates) offered in step 3.
+    const FAMILIES = [
+      { id: "academic", name: "Academic editing", blurb: "Grammar, clarity and style for papers, theses and journal manuscripts.", plans: ["academic-5", "academic-2", "academic-1"] },
+      { id: "proof", name: "Proofreading", blurb: "A light final pass for spelling, grammar and punctuation.", plans: ["proof-5", "proof-2", "proof-1"] },
+      { id: "business", name: "Business editing", blurb: "Clear, professional wording for reports, proposals and web copy.", plans: ["business-3", "business-1"] },
+      { id: "rewrite", name: "Rewriting", blurb: "We rewrite unclear passages to improve clarity, tone and readability.", plans: ["rewrite-3"] },
+      { id: "dev", name: "Developmental editing", blurb: "Deeper help with structure, argument and flow.", plans: ["dev-14"] },
+      { id: "sameday", name: "Same-day editing", blurb: "Urgent editing, returned within hours.", plans: ["rush-4h", "rush-2h"] },
+    ];
+    let family = FAMILIES[0], plan = family.plans[0];
+    const DOC_TYPES = ["Academic paper / journal manuscript", "Thesis or dissertation", "Report / whitepaper", "Business document", "Book or chapter", "Essay or assignment", "Other"];
 
     view.innerHTML = `
-      <div class="panel"><h2>Get a quote &amp; submit your documents</h2>
-        <form id="o-form">
-          <div class="row">
-            <div><label for="o-service">Service &amp; turnaround</label><select id="o-service"></select></div>
-            <div><label for="o-cur">Currency</label>
-              <select id="o-cur"><option value="USD">US dollar ($)</option><option value="INR">Indian rupee (₹)</option></select></div>
+      <div class="alert" id="o-top" hidden></div>
+      <div class="panel wiz">
+        <section class="wstep" id="w1">
+          <div class="wsum"><span class="tick">✓</span><div><b>Document</b><small id="w1-text"></small></div><button type="button" class="link" data-goto="1">Change</button></div>
+          <div class="wbody">
+            <h2><span class="snum">1</span> Upload your document</h2>
+            <p class="hint" style="text-align:left;margin:0">We count the words in your file. The word count sets your price.</p>
+            <label class="drop" id="o-drop">
+              <input id="o-file" type="file" multiple accept=".docx,.pdf,.txt,.md">
+              <strong>Drag your file here, or click to browse</strong>
+              <span>Word, PDF or text files · up to ${PRICING.MAX_FILES} files, ${PRICING.MAX_MB} MB each · PDFs must contain selectable text, not scans</span>
+            </label>
+            <div id="o-files"></div>
+            <div class="row" style="margin-top:6px">
+              <div><label for="o-doctype">Document type</label><select id="o-doctype">${DOC_TYPES.map((t) => `<option>${esc(t)}</option>`).join("")}</select></div>
+              <div><label id="o-spell-l">Spelling style</label><div class="seg" id="o-spell" role="group" aria-labelledby="o-spell-l">
+                <button type="button" data-v="US English" class="on">US English</button><button type="button" data-v="UK English">UK English</button></div></div>
+            </div>
+            <label for="o-title">Document title <small style="font-weight:400;color:var(--muted)">(printed on your editing certificate)</small></label>
+            <input id="o-title" maxlength="200" placeholder="e.g. Effects of sleep on memory in students">
+            <label for="o-email">Email</label><input id="o-email" type="email" value="${esc(me.email)}" readonly>
+            <p class="hint" style="text-align:left;margin:6px 0 0">We send your order updates and edited files to your account email.</p>
+            <div class="alert" id="o-msg" hidden></div>
+            <button class="btn btn-primary" id="w1-next" type="button" style="margin-top:16px">Continue</button>
           </div>
-          <label class="drop" id="o-drop">
-            <input id="o-file" type="file" multiple accept=".docx,.pdf,.txt,.md">
-            <strong>Drag &amp; drop your documents here</strong>
-            <span>or click to browse · .docx, .pdf or .txt · up to ${PRICING.MAX_FILES} files, ${PRICING.MAX_MB} MB each</span>
-          </label>
-          <div id="o-files"></div>
-          <label for="o-title">Document title <small style="font-weight:400;color:var(--muted)">(printed on your editing certificate)</small></label><input id="o-title" maxlength="200" placeholder="e.g. Effects of sleep on memory in students">
-          <label class="check"><input type="checkbox" id="o-rush"> <span>Rush delivery <small id="o-rush-note"></small></span></label>
-          <div class="summary" id="o-sum"></div>
-          <label for="o-ins">Instructions (optional)</label><textarea id="o-ins" rows="3"></textarea>
-          <div class="alert" id="o-msg" hidden></div>
-          <button class="btn btn-primary" id="o-submit" style="margin-top:16px" type="submit">Upload &amp; submit order</button>
-        </form></div>
+        </section>
+
+        <section class="wstep" id="w2">
+          <div class="wsum"><span class="tick">✓</span><div><b>Service</b><small id="w2-text"></small></div><button type="button" class="link" data-goto="2">Change</button></div>
+          <div class="wbody">
+            <h2><span class="snum">2</span> Choose your service</h2>
+            <div class="row" style="align-items:end"><p class="hint" style="text-align:left;margin:0">Prices are per word, in the currency you select.</p>
+              <div><label for="o-cur">Currency</label><select id="o-cur"><option value="USD">US dollar ($)</option><option value="INR">Indian rupee (₹)</option></select></div></div>
+            <div class="cards" id="svc-grid" role="radiogroup" aria-label="Service"></div>
+            <p class="hint" style="text-align:left">Not sure which one you need? <a href="contact.html" style="color:var(--navy);font-weight:600">Ask us before you pay.</a></p>
+            <div class="info-row"><div><b>Editing certificate</b><small>A certificate confirming a human editor worked on your document. Included free with every paid order.</small></div><span class="chip completed">included</span></div>
+            <button class="btn btn-primary" id="w2-next" type="button" style="margin-top:16px">Continue</button>
+          </div>
+        </section>
+
+        <section class="wstep" id="w3">
+          <div class="wbody">
+            <h2><span class="snum">3</span> Choose your delivery</h2>
+            <p class="hint" style="text-align:left;margin:0">Dates are estimates based on your word count.</p>
+            <div class="cards" id="del-grid" role="radiogroup" aria-label="Delivery"></div>
+            <label class="info-row clickable" id="o-rush-row" for="o-rush"><div><b>Rush delivery</b><small id="o-rush-note"></small></div><input type="checkbox" id="o-rush"></label>
+            <div class="summary" id="o-sum"></div>
+            <label for="o-ins">Instructions for the editor (optional)</label><textarea id="o-ins" rows="3" placeholder="Anything the editor should know: target journal, style guide, parts to focus on…"></textarea>
+            <div class="alert" id="o-msg3" hidden></div>
+            <button class="btn btn-primary" id="o-submit" type="button" style="margin-top:16px">Upload &amp; submit order</button>
+          </div>
+        </section>
+      </div>
       <div class="panel"><h2>My orders</h2><div id="o-list"></div></div>`;
 
-    const sel = $("#o-service");
     const perWord = (id) => (currency === "INR" ? "₹" + (rates[id] * PRICING.INR_RATE).toFixed(2) : "$" + rates[id].toFixed(3));
-    const buildPlans = () => {
-      const keep = sel.value;
-      sel.innerHTML = PLANS.map(([id, label]) => `<option value="${id}">${esc(label)} — ${perWord(id)}/word</option>`).join("");
-      if (keep) sel.value = keep;
-    };
-    const calc = () => {
-      const plan = sel.value, words = items.reduce((s, i) => s + (i.words || 0), 0);
-      const rushOn = rush && !isRushPlan(plan);
-      const usd = words * rates[plan] * (rushOn ? PRICING.RUSH_MULT : 1);
-      let hours = PRICING.HOURS[plan];
+    const planLabel = (id) => PLANS.find((p) => p[0] === id)[1];
+    const totalWords = () => items.reduce((s, i) => s + (i.words || 0), 0);
+    // price and delivery time for one plan (optionally with rush); the server re-checks the price after upload
+    const quote = (p, rushWanted) => {
+      const words = totalWords(), rushOn = rushWanted && !isRushPlan(p);
+      const usd = words * rates[p] * (rushOn ? PRICING.RUSH_MULT : 1);
+      let hours = PRICING.HOURS[p];
       if (hours >= 24) hours += Math.floor(Math.max(0, words - 1) / 10000) * PRICING.EXTRA_HOURS_PER_10K;
       if (rushOn) hours = Math.max(4, Math.ceil(hours / 2));
-      return { plan, words, rushOn, hours, price: roundPrice(currency === "INR" ? usd * PRICING.INR_RATE : usd, currency) };
+      return { plan: p, words, rushOn, hours, price: roundPrice(currency === "INR" ? usd * PRICING.INR_RATE : usd, currency) };
+    };
+    const calc = () => quote(plan, rush);
+    const when = (hours) => hours < 24 ? `within ${duration(hours)}` : new Date(Date.now() + hours * 36e5).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+
+    const setStep = (n) => {
+      step = n;
+      [1, 2, 3].forEach((i) => { const s = $("#w" + i); s.classList.toggle("open", i === n); s.classList.toggle("done", i < n); s.classList.toggle("locked", i > n); });
+      $("#w1-text").textContent = `${$("#o-doctype").value} · ${totalWords().toLocaleString()} words · ${spelling}`;
+      $("#w2-text").textContent = family.name;
+      if (n === 3) renderDelivery();
+    };
+    const renderServices = () => {
+      $("#svc-grid").innerHTML = FAMILIES.map((f) => `<button type="button" role="radio" aria-checked="${f === family}" class="opt${f === family ? " on" : ""}" data-fam="${f.id}">
+        <b>${esc(f.name)}</b><small>${esc(f.blurb)}</small><em>${perWord(f.plans[0])}/word</em></button>`).join("");
+    };
+    const renderDelivery = () => {
+      $("#del-grid").innerHTML = family.plans.map((p) => {
+        const q = quote(p, false);
+        return `<button type="button" role="radio" aria-checked="${p === plan}" class="opt${p === plan ? " on" : ""}" data-plan="${p}">
+          <b>${esc(planLabel(p))}</b><small>Estimated: ${esc(when(q.hours))}</small><em>${money(q.price, currency)}</em></button>`;
+      }).join("");
+      const box = $("#o-rush"), isR = isRushPlan(plan);
+      box.disabled = isR; if (isR) { box.checked = false; rush = false; }
+      $("#o-rush-row").hidden = false;
+      $("#o-rush-note").textContent = isR ? "Already included in this plan." : `${PRICING.RUSH_MULT}× the price, in about half the time.`;
+      renderSummary();
     };
     const renderSummary = () => {
-      const q = calc(), rushBox = $("#o-rush");
-      rushBox.disabled = isRushPlan(q.plan);
-      if (rushBox.disabled) { rushBox.checked = false; rush = false; }
-      $("#o-rush-note").textContent = isRushPlan(q.plan) ? "(already included in this plan)" : `(${PRICING.RUSH_MULT}× price, about half the time)`;
+      const q = calc();
       $("#o-sum").innerHTML = q.words
         ? `<div class="sum-row"><span>Words</span><b>${q.words.toLocaleString()}</b></div>
+           <div class="sum-row"><span>Service</span><b>${esc(planLabel(q.plan))}${q.rushOn ? " + rush" : ""}</b></div>
            <div class="sum-row"><span>Rate</span><b>${perWord(q.plan)} / word${q.rushOn ? ` × ${PRICING.RUSH_MULT} rush` : ""}</b></div>
-           <div class="sum-row"><span>Estimated delivery</span><b>${duration(q.hours)}${q.rushOn ? " (rush)" : ""}</b></div>
+           <div class="sum-row"><span>Estimated delivery</span><b>${esc(when(q.hours))}</b></div>
            <div class="sum-row total"><span>Total price</span><b>${money(q.price, currency)}</b></div>`
         : `<p class="hint" style="margin:0">Add a document to see your price and delivery time.</p>`;
     };
@@ -396,23 +459,34 @@
         const it = { file: f, words: 0, state: "counting" };
         items.push(it);
         countWords(f).then((n) => { it.words = n; it.state = "ok"; }, () => { it.state = "manual"; })
-          .finally(() => { renderFiles(); renderSummary(); });
+          .finally(() => { renderFiles(); if (step === 3) renderDelivery(); });
       }
-      renderFiles(); renderSummary();
+      renderFiles();
     };
 
     $("#o-cur").value = currency;
-    buildPlans(); renderSummary();
-    sel.onchange = renderSummary;
-    $("#o-cur").onchange = (e) => { currency = e.target.value; try { localStorage.setItem("ce_currency", currency); } catch {} buildPlans(); renderSummary(); };
+    renderServices(); setStep(1);
+    $("#o-cur").onchange = (e) => { currency = e.target.value; try { localStorage.setItem("ce_currency", currency); } catch {} renderServices(); if (step === 3) renderDelivery(); };
+    $("#o-spell").onclick = (e) => { const b = e.target.closest("[data-v]"); if (!b) return; spelling = b.dataset.v; $("#o-spell").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); };
+    $("#svc-grid").onclick = (e) => { const b = e.target.closest("[data-fam]"); if (!b) return; family = FAMILIES.find((f) => f.id === b.dataset.fam); plan = family.plans[0]; renderServices(); };
+    $("#del-grid").onclick = (e) => { const b = e.target.closest("[data-plan]"); if (!b) return; plan = b.dataset.plan; renderDelivery(); };
     $("#o-rush").onchange = (e) => { rush = e.target.checked; renderSummary(); };
     $("#o-file").onchange = (e) => { addFiles(e.target.files); e.target.value = ""; };
+    view.querySelectorAll("[data-goto]").forEach((b) => { b.onclick = () => setStep(+b.dataset.goto); });
+    $("#w1-next").onclick = () => {
+      const msg = $("#o-msg");
+      if (!items.length) return note(msg, "Add at least one document first.", false);
+      if (items.some((i) => i.state === "counting")) return note(msg, "Please wait until all files are counted.", false);
+      if (items.some((i) => !i.words)) return note(msg, "Enter the word count for every file.", false);
+      msg.hidden = true; setStep(2);
+    };
+    $("#w2-next").onclick = () => setStep(3);
     const drop = $("#o-drop");
     ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
     ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
     drop.addEventListener("drop", (e) => { e.preventDefault(); addFiles(e.dataTransfer.files); });
-    $("#o-files").onclick = (e) => { const b = e.target.closest("[data-rm]"); if (b) { items.splice(+b.dataset.rm, 1); renderFiles(); renderSummary(); } };
-    $("#o-files").oninput = (e) => { const i = e.target.dataset.manual; if (i !== undefined) { items[+i].words = parseInt(e.target.value, 10) || 0; renderSummary(); } };
+    $("#o-files").onclick = (e) => { const b = e.target.closest("[data-rm]"); if (b) { items.splice(+b.dataset.rm, 1); renderFiles(); } };
+    $("#o-files").oninput = (e) => { const i = e.target.dataset.manual; if (i !== undefined) items[+i].words = parseInt(e.target.value, 10) || 0; };
 
     const draw = async () => {
       const [orders, { data: myReviews }] = await Promise.all([loadOrders(), sb.from("reviews").select("order_id,approved")]);
@@ -429,12 +503,9 @@
     };
     document.addEventListener("orders-changed", draw);
 
-    $("#o-form").onsubmit = async (e) => {
-      e.preventDefault();
-      const msg = $("#o-msg"), btn = $("#o-submit"), label = "Upload & submit order";
-      if (!items.length) return note(msg, "Add at least one document first.", false);
-      if (items.some((i) => i.state === "counting")) return note(msg, "Please wait until all files are counted.", false);
-      if (items.some((i) => !i.words)) return note(msg, "Enter the word count for every file.", false);
+    $("#o-submit").onclick = async () => {
+      const msg = $("#o-msg3"), btn = $("#o-submit"), label = "Upload & submit order";
+      if (!items.length || items.some((i) => i.state === "counting" || !i.words)) return note(msg, "Go back to step 1 and check your documents.", false);
       const q = calc();
       btn.disabled = true;
       const paths = [], stamp = Date.now();
@@ -449,19 +520,23 @@
         }
         paths.push(path);
       }
+      const extra = $("#o-ins").value.trim();
+      const instructions = `Document type: ${$("#o-doctype").value}\nSpelling style: ${spelling}` + (extra ? "\n\n" + extra : "");
       const { data: created, error } = await sb.from("orders").insert({
-        customer_id: user.id, service: PLANS.find((p) => p[0] === q.plan)[1] + (q.rushOn ? " + rush" : ""),
+        customer_id: user.id, service: planLabel(q.plan) + (q.rushOn ? " + rush" : ""),
         plan: q.plan, doc_title: $("#o-title").value.trim() || items[0].file.name.replace(/.[^.]+$/, ""), word_count: q.words, price: q.price, currency, rush: q.rushOn,
-        file_path: paths[0], file_paths: paths, instructions: $("#o-ins").value.trim(),
+        file_path: paths[0], file_paths: paths, instructions,
       }).select("id").single();
       btn.disabled = false; btn.textContent = label;
       if (error) { await sb.storage.from(CUST).remove(paths); return note(msg, error.message, false); }
-      items.length = 0; $("#o-ins").value = ""; $("#o-title").value = ""; $("#o-rush").checked = false; rush = false;
-      renderFiles(); renderSummary();
-      note(msg, "Order submitted. Checking your word count…", true);
+      items.length = 0; $("#o-ins").value = ""; $("#o-title").value = ""; $("#o-rush").checked = false; rush = false; msg.hidden = true;
+      renderFiles(); setStep(1);
+      const top = $("#o-top");
+      note(top, "Order submitted. Checking your word count…", true);
+      top.scrollIntoView({ behavior: "smooth", block: "center" });
       const { data: v, error: vErr } = await sb.functions.invoke("verify-order", { body: { order_id: created.id } });
-      if (vErr || !v || v.error) note(msg, "Order submitted. Our team will confirm the final word count and price.", true);
-      else note(msg, `Order submitted. Verified: ${v.words.toLocaleString()} words, total ${money(v.price, v.currency)}. Use "Pay now" below to start your order.`, true);
+      if (vErr || !v || v.error) note(top, "Order submitted. Our team will confirm the final word count and price.", true);
+      else note(top, `Order submitted. Verified: ${v.words.toLocaleString()} words, total ${money(v.price, v.currency)}. Use "Pay now" in My orders below to start your order.`, true);
       draw();
     };
     draw();
@@ -579,47 +654,7 @@
     draw();
   }
 
-  /* ---------- my account (every role) ---------- */
-  function profilePanel() {
-    const isCustomer = me.role === "customer";
-    $("#acct-wrap").insertAdjacentHTML("beforeend", `<div class="panel" id="acct"><h2>My account</h2>
-      <form id="pf-name" class="inline-form"><label class="sr-only" for="pf-n">Full name</label><input id="pf-n" maxlength="120" value="${esc(me.full_name || "")}" required><button class="btn btn-ghost btn-sm" type="submit">Save name</button></form>
-      <form id="pf-pass" class="inline-form" style="margin-top:12px"><label class="sr-only" for="pf-p">New password</label><input id="pf-p" type="password" minlength="8" autocomplete="new-password" placeholder="New password (min 8 characters)" required><button class="btn btn-ghost btn-sm" type="submit">Change password</button></form>
-      <div class="alert" id="pf-msg" hidden></div>
-      ${isCustomer ? `<h3 class="od-h" style="margin-top:26px">Delete my account</h3>
-        <p class="hint" style="text-align:left;margin:0 0 8px">This permanently removes your account, your uploaded and edited files, your orders and your reviews. It cannot be undone. Orders being edited must be delivered first. See our <a href="privacy.html">Privacy policy</a>.</p>
-        <form id="pf-del" class="inline-form"><label class="sr-only" for="pf-d">Type DELETE to confirm</label><input id="pf-d" autocomplete="off" placeholder="Type DELETE to confirm"><button class="btn btn-ghost btn-sm" type="submit">Delete my account</button></form>` : ""}
-    </div>`);
-    const msg = $("#pf-msg");
-    $("#pf-name").onsubmit = async (e) => {
-      e.preventDefault();
-      const { error } = await sb.rpc("update_my_name", { p_name: $("#pf-n").value });
-      if (error) return note(msg, error.message, false);
-      me.full_name = $("#pf-n").value.trim(); $("#who").textContent = me.full_name || me.email;
-      note(msg, "Name saved.", true);
-    };
-    $("#pf-pass").onsubmit = async (e) => {
-      e.preventDefault();
-      const { error } = await sb.auth.updateUser({ password: $("#pf-p").value });
-      if (error) return note(msg, error.message, false);
-      $("#pf-p").value = ""; note(msg, "Password changed.", true);
-    };
-    const del = $("#pf-del");
-    if (del) del.onsubmit = async (e) => {
-      e.preventDefault();
-      if ($("#pf-d").value.trim() !== "DELETE") return note(msg, "Type DELETE (in capital letters) to confirm.", false);
-      if (!confirm("Delete your account and all your files permanently?")) return;
-      const { data, error } = await sb.functions.invoke("delete-account");
-      let text = data && data.error;
-      if (error && !text) { try { text = (await error.context.json()).error; } catch { text = "Could not delete the account. Please contact us."; } }
-      if (text) return note(msg, text, false);
-      await sb.auth.signOut();
-      location.replace("index.html");
-    };
-  }
-
-  await ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
-  profilePanel();
+  ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
 })();
 </script>
 </body>
