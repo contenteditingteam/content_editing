@@ -37,6 +37,7 @@ ${noindex}
 <meta property="og:url" content="${SITE}/${slug}">
 <meta property="og:image" content="${SITE}/images/logo.webp">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "WebPage", name: title, url: SITE + "/" + slug, description })}</script>
 <script src="/consent.js" defer></script><link rel="icon" href="/images/logo-sm.webp"><link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -114,7 +115,7 @@ const refunds = `
 const pages = [
   ["terms", "Terms of service", "The terms for using Content Editing: orders, prices, your rights to your document and our responsibilities.", terms],
   ["privacy", "Privacy policy", "What personal information Content Editing collects, how your files are protected and deleted, and the choices you have.", privacy],
-  ["refunds", "Refunds and revisions", "How free revisions and refunds work at Content Editing.", refunds],
+  ["refunds", "Refunds and revisions", "How free revisions and refunds work at Content Editing: who is eligible, how long you have to ask, and how refunds are paid.", refunds],
 ]
 for (const [slug, t, d, b] of pages) writeFileSync(`${slug}.html`, page(slug, t, d, b))
 console.log(unresolved.length ? `built 3 legal pages (DRAFT, noindex). Still to fill in legal-config.mjs: ${unresolved.join(", ")}` : "built 3 legal pages (complete)")

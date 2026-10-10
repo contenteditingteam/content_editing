@@ -2,6 +2,7 @@
 // Run:  node scripts/build-blog.mjs
 import { mkdirSync, writeFileSync } from "node:fs"
 import { posts, SITE, DATE } from "./blog-posts.mjs"
+import { seo, keywords, serp } from "./blog-seo.mjs"
 import { footer } from "./footer.mjs"
 import { legalPages } from "./legal-pages.mjs"
 
@@ -62,10 +63,15 @@ for (const p of posts) {
       },
     ],
   }
+  const x = seo[p.slug]
+  if (x) ld["@graph"].push({ "@type": "FAQPage", mainEntity: x.faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) })
+  const answerHtml = x ? `<p class="note"><strong>Short answer:</strong> ${esc(x.answer)}</p>\n` : ""
+  const faqHtml = x ? `\n<h2>Frequently asked questions</h2>\n${x.faqs.map(([q, a]) => `<h3>${esc(q)}</h3>\n<p>${esc(a)}</p>`).join("\n")}` : ""
   const related = posts.filter((x) => x.slug !== p.slug).slice(0, 3)
     .map((x) => `<a class="card" href="/blog/${x.slug}"><span class="chip">${esc(x.category)}</span><h3 style="margin-top:10px">${esc(x.title)}</h3><p>${esc(x.description)}</p></a>`).join("")
-  writeFileSync(`blog/${p.slug}.html`, `${head({ title: `${p.title} | Content Editing`, description: p.description, url, type: "article",
-    extra: `<script type="application/ld+json">${JSON.stringify(ld)}</script>` })}
+  writeFileSync(`blog/${p.slug}.html`, `${head({ title: (serp[p.slug] && serp[p.slug].title) || `${p.title} | Content Editing`, description: (serp[p.slug] && serp[p.slug].description) || p.description, url, type: "article",
+    extra: `<meta name="keywords" content="${esc(keywords[p.slug] || "")}">
+<script type="application/ld+json">${JSON.stringify(ld)}</script>` })}
 <body>
 ${HEADER}
 <div class="page-hero"><div class="container">
@@ -74,7 +80,7 @@ ${HEADER}
   <p>${esc(p.category)} · ${p.minutes} min read · <time datetime="${DATE}">5 October 2026</time></p>
 </div></div>
 <article class="post"><div class="container">
-${p.body}
+${answerHtml}${p.body}${faqHtml}
 <div class="post-cta"><h3>Ready to polish your writing?</h3><p>Upload your document, see your price and delivery time instantly, and get it back edited by a human editor.</p><a class="btn btn-primary" href="/login.html">Get an instant quote</a></div>
 </div></article>
 <section class="alt"><div class="container"><div class="section-head"><h2>More articles</h2></div><div class="grid g3">${related}</div></div></section>
@@ -90,11 +96,12 @@ const indexLd = { "@context": "https://schema.org", "@type": "Blog", name: "Cont
   blogPost: posts.map((p) => ({ "@type": "BlogPosting", headline: p.title, url: `${SITE}/blog/${p.slug}`, datePublished: DATE })) }
 writeFileSync("blog.html", `${head({ title: "Editing & Academic Writing Blog | Content Editing",
   description: "Practical guides on proofreading, editing, thesis writing, grammar and publishing from the Content Editing team.", url: `${SITE}/blog`,
-  extra: `<script type="application/ld+json">${JSON.stringify(indexLd)}</script>` })}
+  extra: `<meta name="keywords" content="editing tips, publishing guide, academic writing, research writing, proofreading, manuscript editing">
+<script type="application/ld+json">${JSON.stringify(indexLd)}</script>` })}
 <body>
 ${HEADER}
 <div class="page-hero"><div class="container"><h1>The Content Editing Blog</h1><p>Practical guides on editing, proofreading, academic writing and publishing.</p></div></div>
-<section><div class="container"><h2 class="sr-only">Latest articles</h2><div class="grid g3">
+<section><div class="container"><p style="max-width:820px;margin:0 auto 28px">Browse our editing tips and publishing guide articles for academic writing and research writing: proofreading, grammar check and error correction advice, and answers on editing prices and the editing certificate.</p><h2 class="sr-only">Latest articles</h2><div class="grid g3">
     ${cards}
 </div></div></section>
 ${FOOTER}

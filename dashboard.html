@@ -5,31 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard | Content Editing</title>
 <meta name="robots" content="noindex">
-<script src="/consent.js" defer></script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css">
+<script src="/consent.js" defer></script><link rel="icon" href="images/logo-sm.webp"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="dashboard.css">
 </head>
-<body>
-<header><div class="container nav">
-  <a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a>
-  <button class="menu-btn" aria-label="Menu">☰</button>
-  <ul>
-    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li><li><a href="profile.html">My profile</a></li>
-    <li><a class="btn btn-primary" href="#" id="logout">Log out</a></li>
-  </ul>
-</div></header>
-
-<div class="page-hero"><div class="container">
-  <h1 id="who">Loading…</h1>
-  <p><span class="role" id="role"></span> <a class="btn btn-ghost btn-sm hero-link" href="profile.html">My profile</a></p>
-</div></div>
-
-<section class="dash"><div class="container" id="view"><p>Loading your dashboard…</p></div></section>
-
-<footer><div class="container"><div class="f-grid">
-  <div><a href="index.html" class="logo"><img src="images/logo-sm.webp" width="150" height="50" alt="Content Editing logo"></a><p style="margin-top:12px">Human editing and proofreading for academics, businesses and authors.</p></div>
-  <div><p class="f-title">Services</p><ul><li><a href="services.html#academic">Academic editing</a></li><li><a href="services.html#thesis">Thesis &amp; dissertation</a></li><li><a href="services.html#business">Business editing</a></li><li><a href="services.html#proof">Proofreading</a></li><li><a href="services.html#book">Book editing</a></li></ul></div>
-  <div><p class="f-title">Company</p><ul><li><a href="about.html">About</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="blog.html">Blog</a></li><li><a href="reviews.html">Customer reviews</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-  <div><p class="f-title">Get started</p><ul><li><a href="login.html">Submit a document</a></li><li><a href="contact.html">Ask a question</a></li><li><a href="verify.html">Verify a certificate</a></li></ul><p class="f-title" style="margin-top:18px">Legal</p><ul><li><a href="terms.html">Terms of service</a></li><li><a href="privacy.html">Privacy policy</a></li><li><a href="refunds.html">Refunds &amp; revisions</a></li><li><a href="#" data-cookie-settings>Cookie settings</a></li></ul></div>
-</div><div class="copy">© 2026 Content Editing. All rights reserved.</div></div></footer>
+<body class="app">
+<aside class="sb" id="sb" aria-label="Dashboard menu">
+  <div class="sb-card"><b id="who">Loading…</b><span class="mail" id="mail"></span><span class="role" id="role"></span></div>
+  <nav id="nav" aria-label="Dashboard"></nav>
+  <div class="sb-foot"><a href="index.html">← Back to website</a></div>
+</aside>
+<div class="sb-scrim" id="scrim"></div>
+<div class="app-main">
+  <header class="topbar">
+    <button class="burger" id="burger" aria-label="Open menu">☰</button>
+    <a class="brand" href="index.html"><img src="images/logo-sm.webp" alt="Content Editing logo"><span>Content Editing</span></a><span class="hello" id="hello"></span>
+    <div class="spacer"></div>
+    <button class="signout" id="logout" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign Out</button>
+  </header>
+  <main class="app-content" id="view"><p>Loading your dashboard…</p></main>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
@@ -43,6 +36,8 @@
 
   $("#who").textContent = me.full_name || me.email;
   $("#role").textContent = me.role;
+  $("#mail").textContent = me.email;
+  { const hr = new Date().getHours(); $("#hello").textContent = (hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening") + ", " + String(me.full_name || me.email).split(" ")[0]; }
   $("#logout").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
 
   const SERVICES = ["Academic editing", "Business editing", "Proofreading", "Book editing", "Same-day editing", "Rewriting", "ESL editing"];
@@ -321,7 +316,7 @@
   const certBtn = (o) => o.certificate_no ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="certificate.html?o=${esc(o.id)}">Certificate</a>` : "";
   const fileBtns = (o, prefix) => filesOf(o).map((p, i, a) => dlBtn(CUST, p, a.length > 1 ? `${prefix} ${i + 1}` : prefix)).join(" ");
 
-  async function customerView() {
+  async function newOrderView() {
     const items = []; // { file, words, state: 'counting' | 'ok' | 'manual' }
     let currency = getCur(); // same remembered choice as the public pages (script.js)
     let rush = false, step = 1, spelling = "US English";
@@ -338,6 +333,7 @@
     const DOC_TYPES = ["Academic paper / journal manuscript", "Thesis or dissertation", "Report / whitepaper", "Business document", "Book or chapter", "Essay or assignment", "Other"];
 
     view.innerHTML = `
+      ${head("New Order", "Upload your document, pick a service and see your price before you pay.")}
       <div class="alert" id="o-top" hidden></div>
       <div class="panel wiz">
         <section class="wstep" id="w1">
@@ -390,8 +386,7 @@
             <button class="btn btn-primary" id="o-submit" type="button" style="margin-top:16px">Upload &amp; submit order</button>
           </div>
         </section>
-      </div>
-      <div class="panel"><h2>My orders</h2><div id="o-list"></div></div>`;
+      </div>`;
 
     const perWord = (id) => (currency === "INR" ? "₹" + (rates[id] * PRICING.INR_RATE).toFixed(2) : "$" + rates[id].toFixed(3));
     const planLabel = (id) => PLANS.find((p) => p[0] === id)[1];
@@ -488,21 +483,6 @@
     $("#o-files").onclick = (e) => { const b = e.target.closest("[data-rm]"); if (b) { items.splice(+b.dataset.rm, 1); renderFiles(); } };
     $("#o-files").oninput = (e) => { const i = e.target.dataset.manual; if (i !== undefined) items[+i].words = parseInt(e.target.value, 10) || 0; };
 
-    const draw = async () => {
-      const [orders, { data: myReviews }] = await Promise.all([loadOrders(), sb.from("reviews").select("order_id,approved")]);
-      const reviewed = new Map((myReviews || []).map((r) => [r.order_id, r]));
-      const reviewCell = (o) => {
-        if (o.status !== "completed") return "";
-        const r = reviewed.get(o.id);
-        return r ? `<span class="chip ${r.approved ? "completed" : "new"}">${r.approved ? "review published" : "review pending"}</span>`
-                 : `<button class="btn btn-ghost btn-sm" data-review="${esc(o.id)}">Leave a review</button>`;
-      };
-      $("#o-list").innerHTML = table(["Date", "Service", "Words", "Price", "Payment", "Status", "Files"],
-        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payCell(o)}</td><td>${chip(o.status)}</td>
-          <td>${detailsBtn(o)} ${fileBtns(o, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") + " " + certBtn(o) + " " + reviewCell(o) : ""}</td></tr>`));
-    };
-    document.addEventListener("orders-changed", draw);
-
     $("#o-submit").onclick = async () => {
       const msg = $("#o-msg3"), btn = $("#o-submit"), label = "Upload & submit order";
       if (!items.length || items.some((i) => i.state === "counting" || !i.words)) return note(msg, "Go back to step 1 and check your documents.", false);
@@ -536,67 +516,215 @@
       top.scrollIntoView({ behavior: "smooth", block: "center" });
       const { data: v, error: vErr } = await sb.functions.invoke("verify-order", { body: { order_id: created.id } });
       if (vErr || !v || v.error) note(top, "Order submitted. Our team will confirm the final word count and price.", true);
-      else note(top, `Order submitted. Verified: ${v.words.toLocaleString()} words, total ${money(v.price, v.currency)}. Use "Pay now" in My orders below to start your order.`, true);
-      draw();
+      else note(top, `Order submitted. Verified: ${v.words.toLocaleString()} words, total ${money(v.price, v.currency)}. Taking you to My Jobs, where you can press "Pay now" to start your order.`, true);
+      setTimeout(() => { location.hash = "#orders"; }, 2500);
     };
-    draw();
   }
 
-  /* ---------- editor ---------- */
-  async function editorView() {
-    view.innerHTML = `<div class="panel"><h2>My assigned documents</h2><div id="e-list"></div></div>`;
-    const draw = async () => {
-      const orders = await loadOrders();
-      $("#e-list").innerHTML = table(["Date", "Service", "Words", "Instructions", "Customer file", "Status", "Return edited file"],
-        orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${esc(o.instructions)}</td>
-          <td>${detailsBtn(o)} ${fileBtns(o, "Download")}</td>
-          <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1, 4), o.status)}</select></td>
-          <td>${o.result_path ? dlBtn(EDIT, o.result_path, "Sent ✓") + " " : ""}<input type="file" class="file-sm" data-up="${esc(o.id)}"></td></tr>`));
+  /* ---------- shell: routing, orders list UI ---------- */
+  const head = (title, sub = "", action = "") => `<div class="ph"><div><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div>${action}</div>`;
+  const dshort = (d) => new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const shortId = (o) => "ORD-" + String(o.id).replace(/-/g, "").slice(0, 6).toUpperCase();
+  const idCell = (o) => `<button class="oid" type="button" data-od="${esc(o.id)}">${shortId(o)}</button>`;
+  const isOpen = (o) => o.status !== "completed" && o.status !== "cancelled";
+  const deadlineOf = (o) => { // same delivery-time rules as the quote form (PRICING)
+    let hours = PRICING.HOURS[o.plan];
+    if (!hours || o.payment_status !== "paid") return null;
+    if (hours >= 24) hours += Math.floor(Math.max(0, (o.word_count || 1) - 1) / 10000) * PRICING.EXTRA_HOURS_PER_10K;
+    if (o.rush) hours = Math.max(4, Math.ceil(hours / 2));
+    return new Date(new Date(o.paid_at || o.created_at).getTime() + hours * 36e5);
+  };
+  const deadlineCell = (o) => {
+    const d = deadlineOf(o);
+    if (!d) return '<span class="dim">—</span>';
+    return `<span class="${isOpen(o) && d < new Date() ? "late" : ""}">${dshort(d)}</span>`;
+  };
+  const statusLabel = (o) => o.status === "new" ? (o.payment_status === "paid" ? "paid" : "awaiting payment")
+    : o.status === "completed" ? "delivered" : o.status.replace("_", " ");
+  const statusPill = (o) => { const k = o.status === "new" ? (o.payment_status === "paid" ? "paid" : "awaiting") : o.status === "completed" ? "delivered" : o.status; return `<span class="chip ${esc(k)}">${esc(statusLabel(o))}</span>`; };
+  const payPill = (o) => o.payment_status === "paid" ? '<span class="chip pay-ok">Paid</span>' : '<span class="chip pay-pend">Pending</span>';
+
+  const GROUPS = {
+    all: ["All", () => true],
+    active: ["Active", isOpen],
+    progress: ["In Progress", (o) => o.status === "assigned" || o.status === "in_progress"],
+    done: ["Completed", (o) => o.status === "completed"],
+    cancelled: ["Cancelled", (o) => o.status === "cancelled"],
+  };
+  const countUp = () => view.querySelectorAll(".stat strong").forEach((el) => { // numbers count up on load
+    const t = el.textContent.trim(); if (!/^[0-9]+$/.test(t) || +t < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const n = +t, t0 = performance.now();
+    const step = (now) => { const p = Math.min(1, (now - t0) / 700); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+  // Stat cards, filters, sortable + paged table. cols: [{ h, key?, val?, cls?, td }]
+  // queue:true gives the manager/editor "job queue" look (big stat cards, status select, search, overdue toggle).
+  function ordersUI({ title, sub, action = "", orders, cols, staff = false, queue = false }) {
+    const st = { f: "all", status: "all", q: "", late: false, sort: "created_at", dir: -1, page: 1, per: queue ? 25 : 10 };
+    const isLate = (o) => { const d = deadlineOf(o); return !!d && isOpen(o) && d < new Date(); };
+    const count = (k) => orders.filter(GROUPS[k][1]).length;
+    const keys = Object.keys(GROUPS).filter((k) => k !== "cancelled" || count(k));
+    const hay = (o) => [shortId(o), o.doc_title, o.service, o.customer && o.customer.full_name, o.customer && o.customer.email].join(" ").toLowerCase();
+    const sel = (n) => `<select data-per aria-label="Rows per page">${[10, 25, 50].map((v) => `<option value="${v}" ${v === n ? "selected" : ""}>${v} per page</option>`).join("")}</select>`;
+    const pager = `<span class="pg"><button type="button" data-pg="-1" aria-label="Previous page">‹</button><button type="button" data-pg="1" aria-label="Next page">›</button></span>`;
+    const ICO = {
+      pct: '<path d="M19 5L5 19M7 9a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z"/>',
+      spin: '<circle cx="12" cy="12" r="9" stroke-dasharray="3 3.2"/>',
+      ok: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+      jobs: '<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+      user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
     };
-    view.onchange = async (e) => {
-      const id = e.target.dataset.status; if (!id) return;
-      const { error } = await sb.from("orders").update({ status: e.target.value }).eq("id", id);
-      if (error) alert(error.message);
+    const card = (l, n, ic) => `<div class="stat big"><div><small>${l}</small><strong>${n}</strong></div><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${ICO[ic]}</svg></span>
+      <span class="meter" aria-hidden="true"><i style="--p:${orders.length ? Math.round((n / orders.length) * 100) : 0}%"></i></span></div>`;
+    const stats = queue
+      ? [["Paid", orders.filter((o) => o.payment_status === "paid").length, "pct"], ["In Progress", count("progress"), "spin"], ["Delivered", count("done"), "ok"]]
+      : [["Active Orders", count("active"), "jobs"], ["In Progress", count("progress"), "spin"], ["Completed", count("done"), "ok"]];
+    if (staff) stats.push(["Needs assignment", orders.filter((o) => o.payment_status === "paid" && !o.editor_id && o.status === "new").length, "user"]);
+    const late = orders.filter(isLate).length;
+    const top = queue
+      ? `<div class="ph"><div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="badges"><div class="bd"><small>TOTAL</small><b>${orders.length}</b></div><div class="bd red"><small>OVERDUE</small><b>${late}</b></div></div></div>`
+      : head(title, sub, action);
+    const controls = queue
+      ? `<div class="qbar"><h2>Job Queue</h2><div class="qctl">
+          <label>Status <select data-status-f><option value="all">All</option>${STATUS.map((s) => `<option value="${s}">${s.replace("_", " ")}</option>`).join("")}</select></label>
+          <label>Search <input type="search" data-q placeholder="Job ID or customer…" autocomplete="off"></label>
+          <button type="button" class="tog" data-late>● Overdue only</button>
+          <span class="cnt" data-cnt></span>${sel(st.per)}${pager}</div></div>`
+      : `<div class="pills" role="group" aria-label="Filter orders">${keys.map((k) => `<button type="button" class="pill" data-f="${k}">${GROUPS[k][0]} (${count(k)})</button>`).join("")}</div>
+         <div class="tb"><span class="cnt" data-cnt></span>${sel(st.per)}${pager}</div>`;
+    view.innerHTML = `${top}<div class="stats bigs">${stats.map((s) => card(...s)).join("")}</div>${controls}<div class="table-wrap" id="ot"></div>`;
+    const paint = () => {
+      let list = orders.filter((o) => (queue ? st.status === "all" || o.status === st.status : GROUPS[st.f][1](o)) && (!st.late || isLate(o)) && (!st.q || hay(o).includes(st.q)));
+      const col = cols.find((c) => c.key === st.sort);
+      if (col) list.sort((a, b) => { const x = col.val(a), y = col.val(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return (x > y ? 1 : x < y ? -1 : 0) * st.dir; });
+      const pages = Math.max(1, Math.ceil(list.length / st.per));
+      st.page = Math.min(st.page, pages);
+      const start = (st.page - 1) * st.per, rows = list.slice(start, start + st.per);
+      view.querySelector("[data-cnt]").textContent = `${list.length ? start + 1 : 0}-${Math.min(list.length, start + st.per)} of ${list.length}`;
+      view.querySelector('[data-pg="-1"]').disabled = st.page <= 1;
+      view.querySelector('[data-pg="1"]').disabled = st.page >= pages;
+      view.querySelectorAll("[data-f]").forEach((b) => b.classList.toggle("on", b.dataset.f === st.f));
+      const tg = view.querySelector("[data-late]"); if (tg) tg.classList.toggle("on", st.late);
+      view.querySelector("#ot").innerHTML = `<table><thead><tr>${cols.map((c) => `<th class="${c.key ? "s" + (c.key === st.sort ? (st.dir > 0 ? " asc" : " desc") : "") : ""} ${c.cls || ""}" ${c.key ? `data-sort="${c.key}"` : ""}>${c.h}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map((o) => `<tr>${cols.map((c) => `<td class="${c.cls || ""}">${c.td(o)}</td>`).join("")}</tr>`).join("") || `<tr><td class="empty" colspan="${cols.length}">No orders here yet.</td></tr>`}</tbody></table>`;
     };
-    draw();
+    view._click = (e) => {
+      const f = e.target.closest("[data-f]"), s = e.target.closest("[data-sort]"), p = e.target.closest("[data-pg]"), l = e.target.closest("[data-late]");
+      if (f) { st.f = f.dataset.f; st.page = 1; return paint(); }
+      if (l) { st.late = !st.late; st.page = 1; return paint(); }
+      if (s) { const k = s.dataset.sort; st.dir = st.sort === k ? -st.dir : (k === "created_at" || k === "deadline" ? -1 : 1); st.sort = k; return paint(); }
+      if (p) { st.page += +p.dataset.pg; return paint(); }
+    };
+    view._change = (e) => {
+      if (e.target.matches("[data-per]")) { st.per = +e.target.value; st.page = 1; paint(); }
+      else if (e.target.matches("[data-status-f]")) { st.status = e.target.value; st.page = 1; paint(); }
+    };
+    view._input = (e) => { if (e.target.matches("[data-q]")) { st.q = e.target.value.trim().toLowerCase(); st.page = 1; paint(); } };
+    paint();
+    countUp();
+  }
+  view.addEventListener("input", (e) => view._input && view._input(e));
+  view.addEventListener("click", (e) => view._click && view._click(e));
+  view.addEventListener("change", (e) => view._change && view._change(e));
+  let reDraw = null;
+  document.addEventListener("orders-changed", () => reDraw && reDraw());
+
+  const dateCol = { h: "Ordered on", key: "created_at", val: (o) => new Date(o.created_at).getTime(), td: (o) => dshort(o.created_at) };
+  const deadlineCol = { h: "Deadline", key: "deadline", val: (o) => { const d = deadlineOf(o); return d ? d.getTime() : null; }, td: deadlineCell };
+  const idCol = { h: "Order ID", td: (o) => idCell(o) + (o.instructions ? ' <span class="hasins">Has Instructions</span>' : "") };
+  const amountCol = { h: "Amount", key: "price", val: (o) => Number(o.price), cls: "num", td: priceCell };
+
+  // ----- customer -----
+  async function customerOrders() {
+    reDraw = customerOrders;
+    const [orders, { data: myReviews }] = await Promise.all([loadOrders(), sb.from("reviews").select("order_id,approved")]);
+    const reviewed = new Map((myReviews || []).map((r) => [r.order_id, r]));
+    const reviewCell = (o) => {
+      if (o.status !== "completed") return "";
+      const r = reviewed.get(o.id);
+      return r ? `<span class="chip ${r.approved ? "completed" : "new"}">${r.approved ? "review published" : "review pending"}</span>`
+               : `<button class="btn btn-ghost btn-sm" data-review="${esc(o.id)}">Leave a review</button>`;
+    };
+    ordersUI({
+      title: `${me.full_name || me.email}'s Orders`, sub: "Track and manage your orders",
+      action: '<a class="btn btn-primary" href="#new">＋ New Order</a>', orders,
+      cols: [idCol, { h: "Service", td: (o) => esc(o.service) }, { h: "Words", td: (o) => esc(o.word_count) }, deadlineCol, dateCol, amountCol,
+        { h: "Status", td: statusPill },
+        { h: "Payment", td: (o) => o.payment_status === "paid" ? payPill(o) : payCell(o) },
+        { h: "Files", td: (o) => `<div class="acts">${fileBtns(o, "My file")} ${o.status === "completed" ? dlBtn(EDIT, o.result_path, "Edited file") + " " + certBtn(o) + " " + reviewCell(o) : ""}</div>` }],
+    });
   }
 
-  /* ---------- manager (also used by admin) ---------- */
-  async function ordersPanel() {
-    const { data: editors } = await sb.from("profiles").select("id,email,full_name").eq("role", "editor");
-    const edOpts = (cur) => `<option value="">— unassigned —</option>` + (editors || []).map((x) => `<option value="${esc(x.id)}" ${x.id === cur ? "selected" : ""}>${esc(x.full_name || x.email)}</option>`).join("");
+  // ----- messages about orders (customer and editor): latest message per order, opens the order dialog -----
+  async function orderMessagesView() {
     const orders = await loadOrders();
-    return `<div class="panel"><h2>All orders</h2>${table(["Date", "Customer", "Service", "Words", "Price", "Payment", "Files", "Editor", "Status"],
-      orders.map((o) => `<tr><td>${fmt(o.created_at)}</td><td>${esc(o.customer ? o.customer.full_name || o.customer.email : "")}</td><td>${esc(o.service)}</td><td>${esc(o.word_count)}</td><td>${priceCell(o)}</td><td>${payChip(o)}</td>
-        <td>${detailsBtn(o)} ${fileBtns(o, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")} ${certBtn(o)} ${o.verified_at ? "" : `<button class="btn btn-ghost btn-sm" data-verify="${esc(o.id)}">Re-check</button>`}</td>
-        <td><select class="sm" data-editor="${esc(o.id)}" ${o.payment_status === "paid" ? "" : 'disabled title="Assign after payment"'}>${edOpts(o.editor_id)}</select></td>
-        <td><select class="sm" data-status="${esc(o.id)}">${opts(STATUS, o.status)}</select></td></tr>`))}</div>`;
+    const byId = new Map(orders.map((o) => [o.id, o]));
+    const { data: msgs } = orders.length
+      ? await sb.from("order_messages").select("order_id,sender_id,sender_role,body,created_at").in("order_id", orders.map((o) => o.id)).order("created_at", { ascending: false }).limit(500)
+      : { data: [] };
+    const last = new Map();
+    for (const m of msgs || []) if (!last.has(m.order_id)) last.set(m.order_id, m);
+    const rows = [...last.values()].map((m) => { const o = byId.get(m.order_id); return `<tr><td>${idCell(o)}<br><small class="dim">${esc(o.doc_title || o.service)}</small></td>
+      <td style="max-width:420px">${m.sender_id === user.id ? "<b>You:</b> " : ""}${esc(String(m.body).slice(0, 160))}</td><td>${dshort(m.created_at)}</td>
+      <td><button class="btn btn-ghost btn-sm" data-od="${esc(o.id)}">Open</button></td></tr>`; });
+    view.innerHTML = head("Messages", "Conversations about your orders. Open an order to reply.")
+      + `<div class="table-wrap"><table><thead><tr><th>Order</th><th>Latest message</th><th>Date</th><th></th></tr></thead><tbody>${rows.join("") || '<tr><td class="empty" colspan="4">No messages yet. You can message the team from any order.</td></tr>'}</tbody></table></div>`;
   }
-  function bindOrders() {
-    view.onchange = async (e) => {
-      const t = e.target;
-      if (t.dataset.editor) {
-        const patch = { editor_id: t.value || null };
-        const row = t.closest("tr").querySelector("[data-status]");
-        if (t.value && row.value === "new") { patch.status = "assigned"; row.value = "assigned"; }
-        const { error } = await sb.from("orders").update(patch).eq("id", t.dataset.editor);
-        if (error) alert(error.message);
-      } else if (t.dataset.status) {
-        const { error } = await sb.from("orders").update({ status: t.value }).eq("id", t.dataset.status);
-        if (error) alert(error.message);
-      }
-    };
-  }
-  async function managerView() { view.innerHTML = (await ordersPanel()) + (await messagesPanel()) + (await reviewsPanel()); bindOrders(); }
 
-  /* ---------- admin ---------- */
-  async function adminView() {
+  // ----- editor -----
+  const statusChange = async (e) => {
+    const t = e.target;
+    if (t.dataset.editor) {
+      const patch = { editor_id: t.value || null };
+      const row = t.closest("tr").querySelector("[data-status]");
+      if (t.value && row.value === "new") { patch.status = "assigned"; row.value = "assigned"; }
+      const { error } = await sb.from("orders").update(patch).eq("id", t.dataset.editor);
+      if (error) alert(error.message);
+    } else if (t.dataset.status) {
+      const { error } = await sb.from("orders").update({ status: t.value }).eq("id", t.dataset.status);
+      if (error) alert(error.message);
+    }
+  };
+  async function editorOrders() {
+    reDraw = editorOrders;
+    view.onchange = statusChange;
+    const orders = await loadOrders();
+    ordersUI({
+      title: "Editor Dashboard", sub: "Manage your assigned jobs efficiently.", orders, queue: true,
+      cols: [idCol, { h: "Service", td: (o) => esc(o.service) }, { h: "Words", td: (o) => esc(o.word_count) }, deadlineCol, dateCol,
+        { h: "Instructions", td: (o) => `<span style="white-space:pre-wrap">${esc(o.instructions)}</span>` },
+        { h: "Customer file", td: (o) => fileBtns(o, "Download") },
+        { h: "Status", td: (o) => `<select class="sm" data-status="${esc(o.id)}">${opts(STATUS.slice(1, 4), o.status)}</select>` },
+        { h: "Return edited file", td: (o) => `${o.result_path ? dlBtn(EDIT, o.result_path, "Sent ✓") + " " : ""}<input type="file" class="file-sm" data-up="${esc(o.id)}">` }],
+    });
+  }
+
+  // ----- manager / admin -----
+  async function staffOrders() {
+    reDraw = staffOrders;
+    view.onchange = statusChange;
+    const [{ data: editors }, orders] = await Promise.all([sb.from("profiles").select("id,email,full_name").eq("role", "editor"), loadOrders()]);
+    const edOpts = (cur) => `<option value="">— unassigned —</option>` + (editors || []).map((x) => `<option value="${esc(x.id)}" ${x.id === cur ? "selected" : ""}>${esc(x.full_name || x.email)}</option>`).join("");
+    ordersUI({
+      title: me.role === "admin" ? "Admin Dashboard" : "Manager Dashboard", sub: "Manage jobs efficiently across queue stages.", orders, staff: true, queue: true,
+      cols: [idCol, { h: "Customer Name", td: (o) => esc(o.customer ? o.customer.full_name || o.customer.email : "") }, { h: "Word Count", td: (o) => esc(o.word_count) },
+        deadlineCol, dateCol, amountCol,
+        { h: "Status", td: (o) => `<select class="sm" data-status="${esc(o.id)}">${opts(STATUS, o.status)}</select>` },
+        { h: "Editor", td: (o) => `<select class="sm" data-editor="${esc(o.id)}" ${o.payment_status === "paid" ? "" : 'disabled title="Assign after payment"'}>${edOpts(o.editor_id)}</select>` },
+        { h: "Payment", td: payPill },
+        { h: "Files", td: (o) => `<div class="acts">${fileBtns(o, "Customer")} ${dlBtn(EDIT, o.result_path, "Edited")} ${certBtn(o)} ${o.verified_at ? "" : `<button class="btn btn-ghost btn-sm" data-verify="${esc(o.id)}">Re-check</button>`}</div>` }],
+    });
+  }
+  async function inboxView() { view.innerHTML = head("Website messages", "Messages sent from the Contact page.") + (await messagesPanel()); }
+  async function reviewsView() { view.innerHTML = head("Reviews", "Publish or hide customer reviews.") + (await reviewsPanel()); }
+
+  async function peopleView() {
     const draw = async () => {
       const [{ data: invites }, { data: people }] = await Promise.all([
         sb.from("staff_invites").select("*").order("created_at", { ascending: false }),
         sb.from("profiles").select("id,email,full_name,role,created_at").order("created_at", { ascending: false }),
       ]);
-      view.innerHTML = `
+      view.innerHTML = `${head("People", "Add managers and editors, and change roles.")}
         <div class="panel"><h2>Add a manager or editor</h2>
           <p class="hint" style="margin-top:0">Enter their email and role. They then create their account on the login page using that same email.</p>
           <form id="i-form" class="inline-form">
@@ -610,10 +738,7 @@
         </div>
         <div class="panel"><h2>People</h2>${table(["Name", "Email", "Role"],
           (people || []).map((p) => `<tr><td>${esc(p.full_name)}</td><td>${esc(p.email)}</td><td>
-            <select class="sm" data-role="${esc(p.id)}" ${p.id === user.id ? "disabled" : ""}>${opts(["admin", "manager", "editor", "customer"], p.role)}</select></td></tr>`))}</div>
-        ${await ordersPanel()}
-        ${await messagesPanel()}
-        ${await reviewsPanel()}`;
+            <select class="sm" data-role="${esc(p.id)}" ${p.id === user.id ? "disabled" : ""}>${opts(["admin", "manager", "editor", "customer"], p.role)}</select></td></tr>`))}</div>`;
       $("#i-form").onsubmit = async (e) => {
         e.preventDefault();
         const email = $("#i-email").value.trim().toLowerCase(), role = $("#i-role").value;
@@ -635,26 +760,180 @@
       if (t.dataset.role) {
         const { error } = await sb.from("profiles").update({ role: t.value }).eq("id", t.dataset.role);
         if (error) alert(error.message);
-      } else if (t.dataset.editor || t.dataset.status) {
-        bindOrdersHandler(t);
-      }
-    };
-    const bindOrdersHandler = async (t) => {
-      if (t.dataset.editor) {
-        const patch = { editor_id: t.value || null };
-        const row = t.closest("tr").querySelector("[data-status]");
-        if (t.value && row.value === "new") { patch.status = "assigned"; row.value = "assigned"; }
-        const { error } = await sb.from("orders").update(patch).eq("id", t.dataset.editor);
-        if (error) alert(error.message);
-      } else {
-        const { error } = await sb.from("orders").update({ status: t.value }).eq("id", t.dataset.status);
-        if (error) alert(error.message);
       }
     };
     draw();
   }
 
-  ({ admin: adminView, manager: managerView, editor: editorView, customer: customerView }[me.role] || customerView)();
+  // ----- analytics (manager / admin) -----
+  async function analyticsView() {
+    const orders = await loadOrders();
+    const paid = orders.filter((o) => o.payment_status === "paid");
+    const sum = (list, cur) => list.filter((o) => o.currency === cur).reduce((s, o) => s + Number(o.price || 0), 0);
+    const by = new Map();
+    for (const o of orders) {
+      const k = String(o.service).replace(/ \+ rush$/, ""), r = by.get(k) || { n: 0, w: 0, usd: 0, inr: 0 };
+      r.n++; r.w += o.word_count || 0;
+      if (o.payment_status === "paid") { if (o.currency === "INR") r.inr += Number(o.price || 0); else r.usd += Number(o.price || 0); }
+      by.set(k, r);
+    }
+    const months = [];
+    for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); months.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString(undefined, { month: "short", year: "numeric" }), n: 0 }); }
+    for (const o of orders) { const d = new Date(o.created_at), mm = months.find((x) => x.y === d.getFullYear() && x.m === d.getMonth()); if (mm) mm.n++; }
+    const max = Math.max(1, ...months.map((x) => x.n));
+    const words = orders.reduce((s, o) => s + (o.word_count || 0), 0);
+    view.innerHTML = head("Analytics", "A summary of your orders and revenue.")
+      + `<div class="stats">${[["Total orders", orders.length], ["Paid orders", paid.length], ["Revenue (USD)", money(sum(paid, "USD"))], ["Revenue (INR)", money(sum(paid, "INR"), "INR")], ["Words edited", words.toLocaleString()]].map(([l, n]) => `<div class="stat"><small>${l}</small><strong>${n}</strong></div>`).join("")}</div>
+      <div class="panel"><h2>Orders per month</h2>${months.map((x) => `<div class="bar-row"><span>${x.label}</span><div class="bar"><i style="width:${Math.round((x.n / max) * 100)}%"></i></div><b>${x.n}</b></div>`).join("")}</div>
+      <div class="panel"><h2>By service</h2>${table(["Service", "Orders", "Words", "Paid revenue"], [...by.entries()].sort((a, b) => b[1].n - a[1].n).map(([k, r]) => `<tr><td>${esc(k)}</td><td>${r.n}</td><td>${r.w.toLocaleString()}</td><td>${[r.usd ? money(r.usd) : "", r.inr ? money(r.inr, "INR") : ""].filter(Boolean).join(" + ") || "—"}</td></tr>`))}</div>`;
+  }
+
+  // ----- sidebar + router -----
+  const I = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+  const ICON = {
+    jobs: I('<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>'),
+    cart: I('<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12.5a2 2 0 002 1.5h8a2 2 0 002-1.5L21 8H6"/>'),
+    chart: I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+    chat: I('<path d="M21 12a8 8 0 01-11.5 7.2L3 21l1.8-5.5A8 8 0 1121 12z"/>'),
+    star: I('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+    users: I('<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 4.5a3.5 3.5 0 010 7M22 20c0-2.5-1.6-4.4-4-5.3"/>'),
+    user: I('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>'),
+  };
+  const NAV = {
+    customer: [["orders", "My Jobs", "jobs"], ["new", "New Order", "cart"], ["messages", "Messages", "chat"], ["account", "My profile", "user"]],
+    editor: [["orders", "Job Queue", "jobs"], ["messages", "Messages", "chat"], ["account", "My profile", "user"]],
+    manager: [["orders", "Job Queue", "jobs"], ["analytics", "Analytics", "chart"], ["inbox", "Messages", "chat"], ["reviews", "Reviews", "star"], ["account", "My profile", "user"]],
+    admin: [["orders", "Job Queue", "jobs"], ["analytics", "Analytics", "chart"], ["inbox", "Messages", "chat"], ["reviews", "Reviews", "star"], ["people", "People", "users"], ["account", "My profile", "user"]],
+  };
+  const ROUTES = {
+    customer: { orders: customerOrders, new: newOrderView, messages: orderMessagesView },
+    editor: { orders: editorOrders, messages: orderMessagesView },
+    manager: { orders: staffOrders, analytics: analyticsView, inbox: inboxView, reviews: reviewsView },
+    admin: { orders: staffOrders, analytics: analyticsView, inbox: inboxView, reviews: reviewsView, people: peopleView },
+  };
+  $("#burger").onclick = () => document.body.classList.toggle("sb-open");
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.addEventListener("pointerdown", (e) => {
+    const el = e.target.closest(".btn, .pill, .tog, .sb nav a, .signout, .pg button, .oid");
+    if (!el || el.disabled) return;
+    const r = el.getBoundingClientRect(), s = Math.max(r.width, r.height) * 2.2, dot = document.createElement("span");
+    dot.className = "ripple";
+    dot.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+    el.appendChild(dot);
+    dot.addEventListener("animationend", () => dot.remove());
+  });
+  $("#scrim").onclick = () => document.body.classList.remove("sb-open");
+  async function route() {
+    const role = NAV[me.role] ? me.role : "customer";
+    const key = location.hash.slice(1);
+    const cur = NAV[role].find((n) => n[0] === key) || NAV[role][0];
+    $("#nav").innerHTML = NAV[role].map(([k, label, ic]) => `<a href="#${k}" class="${k === cur[0] ? "on" : ""}">${ICON[ic]}${label}</a>`).join("");
+    document.body.classList.remove("sb-open");
+    view.onchange = view.onclick = view._click = view._change = view._input = null; reDraw = null;
+    view.innerHTML = `<div class="skel" aria-label="Loading"><i class="w40"></i><i class="w25"></i><div class="skel-row"><i></i><i></i><i></i></div><i class="tall"></i><i class="tall"></i><i class="tall"></i></div>`;
+    await (cur[0] === "account" ? accountView : ROUTES[role][cur[0]])();
+    view.classList.remove("swap"); void view.offsetWidth; view.classList.add("swap");
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- my account (every role) ---------- */
+  async function accountView() {
+    const when = (d) => (d ? new Date(d).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—");
+    const day = (d) => (d ? new Date(d).toLocaleDateString(undefined, { dateStyle: "medium" }) : "—");
+    const initials = (n) => (String(n || me.email).trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("") || "?").toUpperCase();
+    const ROLE_TEXT = { customer: "Customer", editor: "Editor", manager: "Manager", admin: "Admin" };
+    const isCustomer = me.role === "customer", isStaff = me.role === "manager" || me.role === "admin";
+
+    // What each role sees in "Your activity" (the database already limits orders to the ones this person may see)
+    const { data: orders } = await sb.from("orders").select("status,payment_status,word_count,editor_id");
+    const o = orders || [];
+    const count = (f) => o.filter(f).length;
+    const sum = (f) => o.filter(f).reduce((s, x) => s + (x.word_count || 0), 0);
+    let stats = [];
+    if (isCustomer) stats = [["Orders placed", o.length], ["Paid", count((x) => x.payment_status === "paid")], ["Awaiting payment", count((x) => x.payment_status !== "paid" && x.status !== "cancelled")], ["Delivered", count((x) => x.status === "completed")]];
+    else if (me.role === "editor") stats = [["Assigned to you", o.length], ["In progress", count((x) => x.status === "assigned" || x.status === "in_progress")], ["Delivered", count((x) => x.status === "completed")], ["Words delivered", sum((x) => x.status === "completed").toLocaleString()]];
+    else stats = [["All orders", o.length], ["Paid, not yet assigned", count((x) => x.payment_status === "paid" && !x.editor_id && x.status === "new")], ["In progress", count((x) => x.status === "assigned" || x.status === "in_progress")], ["Delivered", count((x) => x.status === "completed")]];
+    if (me.role === "admin") {
+      const { count: team } = await sb.from("profiles").select("id", { count: "exact", head: true }).in("role", ["manager", "editor"]);
+      stats.push(["Team members", team ?? 0]);
+    }
+
+    view.innerHTML = head("My profile", "Your account details, activity and security.") + `
+      <div class="panel pf-head">
+        <div class="avatar" aria-hidden="true">${esc(initials(me.full_name))}</div>
+        <div class="pf-id"><h2 id="pf-title">${esc(me.full_name || "Your name")}</h2><p>${esc(me.email)} · <span class="chip completed">${esc(ROLE_TEXT[me.role] || me.role)}</span></p></div>
+        <a class="btn btn-ghost btn-sm" href="#orders">Back to dashboard</a>
+      </div>
+
+      <div class="panel"><h2>Your activity</h2>
+        <div class="pf-stats">${stats.map(([k, v]) => `<div class="pf-stat"><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join("")}</div>
+      </div>
+
+      <div class="panel"><h2>Account details</h2>
+        <dl class="pf-dl">
+          <div><dt>Email</dt><dd>${esc(me.email)}</dd></div>
+          <div><dt>Role</dt><dd>${esc(ROLE_TEXT[me.role] || me.role)}</dd></div>
+          <div><dt>Member since</dt><dd>${esc(day(me.created_at || user.created_at))}</dd></div>
+          <div><dt>Last sign-in</dt><dd>${esc(when(user.last_sign_in_at))}</dd></div>
+          ${isCustomer ? `<div><dt>Terms accepted</dt><dd>${esc(me.terms_accepted_at ? when(me.terms_accepted_at) : "Not recorded")}</dd></div>` : ""}
+        </dl>
+        <p class="hint" style="text-align:left">Your email and role can't be changed here. ${isStaff || me.role === "editor" ? "Ask an admin if your role is wrong." : "Contact us if you need to change your email."}</p>
+      </div>
+
+      <div class="panel"><h2>Edit profile</h2>
+        <form id="pf-name" class="inline-form"><label class="sr-only" for="pf-n">Full name</label><input id="pf-n" maxlength="120" value="${esc(me.full_name || "")}" required><button class="btn btn-primary btn-sm" type="submit">Save name</button></form>
+        <div class="alert" id="pf-msg1" hidden></div>
+      </div>
+
+      <div class="panel"><h2>Security and sign out</h2>
+        <form id="pf-pass" class="inline-form"><label class="sr-only" for="pf-p">New password</label><input id="pf-p" type="password" minlength="8" autocomplete="new-password" placeholder="New password (min 8 characters)" required><button class="btn btn-ghost btn-sm" type="submit">Change password</button></form>
+        <div class="alert" id="pf-msg2" hidden></div>
+        <div class="inline-form" style="margin-top:18px">
+          <button class="btn btn-primary btn-sm" type="button" id="pf-out">Log out</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="pf-all">Log out on all devices</button>
+        </div>
+      </div>
+
+      ${isCustomer ? `<div class="panel"><h2>Delete my account</h2>
+        <p class="hint" style="text-align:left;margin:0 0 10px">This permanently removes your account, your uploaded and edited files, your orders and your reviews. It cannot be undone. Orders being edited must be delivered first. See our <a href="privacy.html">Privacy policy</a>.</p>
+        <form id="pf-del" class="inline-form"><label class="sr-only" for="pf-d">Type DELETE to confirm</label><input id="pf-d" autocomplete="off" placeholder="Type DELETE to confirm"><button class="btn btn-ghost btn-sm" type="submit">Delete my account</button></form>
+        <div class="alert" id="pf-msg3" hidden></div></div>` : ""}`;
+
+    $("#pf-name").onsubmit = async (e) => {
+      e.preventDefault();
+      const m = $("#pf-msg1");
+      const { error } = await sb.rpc("update_my_name", { p_name: $("#pf-n").value });
+      if (error) return note(m, error.message, false);
+      me.full_name = $("#pf-n").value.trim();
+      $("#who").textContent = me.full_name || me.email; $("#pf-title").textContent = me.full_name;
+      view.querySelector(".avatar").textContent = initials(me.full_name);
+      note(m, "Name saved.", true);
+    };
+    $("#pf-pass").onsubmit = async (e) => {
+      e.preventDefault();
+      const m = $("#pf-msg2");
+      const { error } = await sb.auth.updateUser({ password: $("#pf-p").value });
+      if (error) return note(m, error.message, false);
+      $("#pf-p").value = ""; note(m, "Password changed.", true);
+    };
+    $("#pf-out").onclick = async () => { await sb.auth.signOut(); location.replace("login.html"); };
+    $("#pf-all").onclick = async () => { await sb.auth.signOut({ scope: "global" }); location.replace("login.html"); };
+    const del = $("#pf-del");
+    if (del) del.onsubmit = async (e) => {
+      e.preventDefault();
+      const m = $("#pf-msg3");
+      if ($("#pf-d").value.trim() !== "DELETE") return note(m, "Type DELETE (in capital letters) to confirm.", false);
+      if (!confirm("Delete your account and all your files permanently?")) return;
+      const { data, error } = await sb.functions.invoke("delete-account");
+      let text = data && data.error;
+      if (error && !text) { try { text = (await error.context.json()).error; } catch { text = "Could not delete the account. Please contact us."; } }
+      if (text) return note(m, text, false);
+      await sb.auth.signOut();
+      location.replace("index.html");
+    };
+  }
+
+  window.addEventListener("hashchange", route);
+  await route();
 })();
 </script>
 </body>
