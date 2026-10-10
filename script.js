@@ -3,8 +3,18 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
 
 /* mobile menu + active link */
-const navUl=$('.nav ul');
-$('.menu-btn')?.addEventListener('click',()=>navUl.classList.toggle('open'));
+const navUl=$('.nav ul'),menuBtn=$('.menu-btn');
+let menuY=0;
+const setMenu=(open)=>{if(!navUl)return;navUl.classList.toggle('open',open);menuBtn?.setAttribute('aria-expanded',open);menuY=scrollY};
+const closeMenu=()=>{if(navUl?.classList.contains('open'))setMenu(false)};
+if(navUl&&menuBtn){
+  navUl.id||(navUl.id='site-nav');menuBtn.setAttribute('aria-controls',navUl.id);menuBtn.setAttribute('aria-expanded','false');
+  menuBtn.addEventListener('click',()=>setMenu(!navUl.classList.contains('open')));
+  navUl.addEventListener('click',e=>{if(e.target.closest('a'))closeMenu()});
+  document.addEventListener('click',e=>{if(!e.target.closest('header'))closeMenu()});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&navUl.classList.contains('open')){closeMenu();menuBtn.focus()}});
+  addEventListener('scroll',()=>{if(Math.abs(scrollY-menuY)>40)closeMenu()},{passive:true});
+}
 $$('.nav ul a').forEach(a=>{const f=location.pathname.split('/').pop()||'index.html';if(a.getAttribute('href')===f)a.classList.add('active')});
 
 /* injected UI: progress bar, cursor glow, subpage blobs */
@@ -86,8 +96,11 @@ const header=$('header'),hs=$('.hscroll'),track=$('.htrack'),hbar=$('.hbar i');
 const speedEls=$$('[data-speed]'),fwraps=$$('.fwrap');
 let lastY=0,mx=innerWidth/2,my=innerHeight/2,gx=mx,gy=my,cur=0,rafOn=false;
 let docMax=0,hsTop=0,hsSpan=1,trackW=0;
+/* on phones the services row is a native swipe carousel (see styles.css), so no scroll-driven track */
+const phoneHs=matchMedia('(max-width:600px)');
+const hsOn=()=>hs&&!phoneHs.matches;
 function measure(){
-  if(hs){hs.style.height=(track.scrollWidth-innerWidth+innerHeight+120)+'px'}
+  if(hs){hs.style.height=hsOn()?(track.scrollWidth-innerWidth+innerHeight+120)+'px':''}
   docMax=document.documentElement.scrollHeight-innerHeight;
   if(hs){hsTop=hs.getBoundingClientRect().top+scrollY;hsSpan=Math.max(1,hs.offsetHeight-innerHeight);trackW=track.scrollWidth-innerWidth}
 }
@@ -99,7 +112,7 @@ function frame(){
   header?.classList.toggle('scrolled',y>40);
   header?.classList.toggle("hide",y>lastY&&y>300&&!(navUl&&navUl.classList.contains("open")));lastY=y;
   speedEls.forEach(el=>el.style.transform=`translate3d(0,${y*el.dataset.speed}px,0)`);
-  if(hs){
+  if(hsOn()){
     const target=Math.min(Math.max((y-hsTop)/hsSpan,0),1);
     cur+=(target-cur)*.09;
     if(Math.abs(target-cur)>.0005)moving=true;else cur=target;
@@ -113,6 +126,7 @@ function frame(){
 }
 addEventListener('scroll',kick,{passive:true});
 addEventListener('resize',()=>{measure();kick()});
+phoneHs.addEventListener?.('change',()=>{if(!hsOn()&&track){track.style.transform='';cur=0}measure();kick()});
 addEventListener('load',()=>{measure();kick()});
 if('ResizeObserver' in window)new ResizeObserver(()=>{measure();kick()}).observe(document.body);
 measure();

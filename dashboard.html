@@ -43,6 +43,12 @@
   const SERVICES = ["Academic editing", "Business editing", "Proofreading", "Book editing", "Same-day editing", "Rewriting", "ESL editing"];
   const STATUS = ["new", "assigned", "in_progress", "completed", "cancelled"];
   const view = $("#view");
+  // phones show each table row as a card; label every cell with its column heading
+  const labelCells = () => $$(".table-wrap table", view).forEach((t) => {
+    const heads = $$("thead th", t).map((th) => th.textContent.trim());
+    $$("tbody tr", t).forEach((tr) => [...tr.children].forEach((td, i) => { if (!td.hasAttribute("colspan") && !td.hasAttribute("data-label")) td.dataset.label = heads[i] ?? ""; }));
+  });
+  new MutationObserver(labelCells).observe(view, { childList: true, subtree: true });
   const fmt = (d) => new Date(d).toLocaleDateString();
   const opts = (list, cur) => list.map((v) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(v.replace("_", " "))}</option>`).join("");
   const table = (heads, rows) => `<div class="table-wrap"><table><thead><tr>${heads.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("") || `<tr><td colspan="${heads.length}">Nothing here yet.</td></tr>`}</tbody></table></div>`;
