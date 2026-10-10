@@ -96,8 +96,8 @@ function frame(){
   rafOn=false;
   const y=scrollY;let moving=false;
   bar.style.transform=`scaleX(${docMax>0?y/docMax:0})`;
-  header.classList.toggle('scrolled',y>40);
-  header.classList.toggle('hide',y>lastY&&y>300&&!navUl.classList.contains('open'));lastY=y;
+  header?.classList.toggle('scrolled',y>40);
+  header?.classList.toggle("hide",y>lastY&&y>300&&!(navUl&&navUl.classList.contains("open")));lastY=y;
   speedEls.forEach(el=>el.style.transform=`translate3d(0,${y*el.dataset.speed}px,0)`);
   if(hs){
     const target=Math.min(Math.max((y-hsTop)/hsSpan,0),1);
