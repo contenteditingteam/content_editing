@@ -87,7 +87,7 @@ const privacy = `
 <h2 id="files">How we protect and delete your files</h2>
 <ul><li>Uploaded and edited files are kept in private storage. Only you, the editor assigned to your order and our managers can open them.</li><li>Editors are only given access after your order is paid.</li><li>We delete your uploaded and edited files ${v("retentionDays", "number of days")} days after your order is completed. You can ask us to delete them sooner at ${EMAIL()}.</li></ul>
 <h2>Who we share it with</h2>
-<p>Only the services we need to run the site: Supabase (hosting, database and file storage), Razorpay (payments), Resend (email), Netlify (website hosting), and Google Analytics if you accept analytics cookies. We may share information if the law requires it.</p>
+<p>Only the services we need to run the site: Supabase (hosting, database and file storage), Razorpay (payments), Netlify (website hosting), and Google Analytics if you accept analytics cookies. We may share information if the law requires it.</p>
 <h2 id="cookies">Cookies and analytics</h2>
 <ul><li>The site stores your login session and your currency choice in your browser. These are needed for the site to work.</li><li>Google Analytics cookies are used only if you press <b>Accept</b> on the cookie bar. If you decline or do not answer, they are not loaded. You can change your choice at any time with <a href="#" data-cookie-settings>Cookie settings</a>.</li></ul>
 <h2>Your choices</h2>

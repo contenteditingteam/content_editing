@@ -24,7 +24,6 @@ $functions = @(
   @{ name = "verify-order";     jwt = $true  },
   @{ name = "payments";         jwt = $true  },
   @{ name = "delete-account";   jwt = $true  },
-  @{ name = "send-email";       jwt = $false },   # called by database webhooks, protected by WEBHOOK_SECRET
   @{ name = "razorpay-webhook"; jwt = $false }    # called by Razorpay, protected by its signature
 )
 foreach ($f in $functions) {
@@ -43,20 +42,17 @@ function Ask-Secret($label) {
 
 Write-Host ""
 Write-Host "Now the secrets. Press Enter to skip any you already set." -ForegroundColor Cyan
-$webhook = -join ((48..57) + (97..122) | Get-Random -Count 40 | ForEach-Object { [char]$_ })
 $pairs = [ordered]@{
-  "RESEND_API_KEY"          = Ask-Secret "Resend API key"
   "RAZORPAY_KEY_ID"         = Ask-Secret "Razorpay Key Id (rzp_test_... or rzp_live_...)"
   "RAZORPAY_KEY_SECRET"     = Ask-Secret "Razorpay Key Secret"
   "RAZORPAY_WEBHOOK_SECRET" = Ask-Secret "Razorpay webhook secret (from Razorpay -> Webhooks)"
 }
 $set = @()
 foreach ($k in $pairs.Keys) { if ($pairs[$k]) { $set += "$k=$($pairs[$k])" } }
-$set += "WEBHOOK_SECRET=$webhook"
-npx --yes supabase secrets set --project-ref $ref @set
-if ($LASTEXITCODE -ne 0) { throw "Setting secrets failed." }
+if ($set.Count) {
+  npx --yes supabase secrets set --project-ref $ref @set
+  if ($LASTEXITCODE -ne 0) { throw "Setting secrets failed." }
+}
 
 Write-Host ""
-Write-Host "Done. Use this value as the x-webhook-secret header on the three database webhooks (orders, contact_messages, order_messages):" -ForegroundColor Green
-Write-Host $webhook -ForegroundColor Yellow
-Write-Host "Copy it now; it is not shown again. Then in Supabase: Database -> Webhooks -> each webhook -> HTTP headers."
+Write-Host "Done." -ForegroundColor Green

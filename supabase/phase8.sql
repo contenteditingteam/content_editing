@@ -196,5 +196,3 @@ revoke all on function public.request_revision(uuid, text) from public, anon;
 grant execute on function public.cancel_order(uuid) to authenticated;
 grant execute on function public.request_revision(uuid, text) to authenticated;
 
--- 6. Then add ONE more database webhook (Database -> Webhooks): table order_messages, event Insert,
---    function send-email, header x-webhook-secret (same value as the other webhooks).

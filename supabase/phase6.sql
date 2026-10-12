@@ -29,5 +29,3 @@ drop policy if exists "contact staff delete" on public.contact_messages;
 create policy "contact staff delete" on public.contact_messages for delete to authenticated
   using (public.app_role() in ('admin','manager'));
 
--- Then add ONE more database webhook (Database -> Webhooks): table contact_messages, event Insert,
--- function send-email, header x-webhook-secret (same as the orders webhook). It emails your staff each new message.

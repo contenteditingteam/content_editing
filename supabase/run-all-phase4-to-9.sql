@@ -200,8 +200,6 @@ drop policy if exists "contact staff delete" on public.contact_messages;
 create policy "contact staff delete" on public.contact_messages for delete to authenticated
   using (public.app_role() in ('admin','manager'));
 
--- Then add ONE more database webhook (Database -> Webhooks): table contact_messages, event Insert,
--- function send-email, header x-webhook-secret (same as the orders webhook). It emails your staff each new message.
 
 -- ======================== phase7.sql ========================
 -- Phase 7: record that a customer accepted the Terms at signup. Run once in Supabase -> SQL Editor.
@@ -420,8 +418,6 @@ revoke all on function public.request_revision(uuid, text) from public, anon;
 grant execute on function public.cancel_order(uuid) to authenticated;
 grant execute on function public.request_revision(uuid, text) to authenticated;
 
--- 6. Then add ONE more database webhook (Database -> Webhooks): table order_messages, event Insert,
---    function send-email, header x-webhook-secret (same value as the other webhooks).
 
 -- ======================== phase9.sql ========================
 -- Phase 9: let a signed-in user change their own display name. Run once in Supabase -> SQL Editor.
